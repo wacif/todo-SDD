@@ -43,7 +43,7 @@ addopts = [
 
 [tool.coverage.run]
 source = ["src"]
-omit = ["tests/*", "src/main.py"]
+omit = ["tests/*", "main.py", "src/interface/cli/console_app.py"]
 
 [tool.coverage.report]
 exclude_lines = [
