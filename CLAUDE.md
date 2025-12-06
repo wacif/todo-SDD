@@ -208,3 +208,10 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Active Technologies
+- Python 3.13+ (001-phase-basic-todo)
+- In-memory only (Python dictionary/list) - no persistence (001-phase-basic-todo)
+
+## Recent Changes
+- 001-phase-basic-todo: Added Python 3.13+
