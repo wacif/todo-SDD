@@ -1,0 +1,53 @@
+# Spec-Kit Configuration for Todo App
+name: todo-sdd
+version: "2.0"
+
+structure:
+  specs_dir: specs
+  features_dir: specs/002-phase-web-app/features
+  api_dir: specs/002-phase-web-app/api
+  database_dir: specs/002-phase-web-app/database
+  ui_dir: specs/002-phase-web-app/ui
+
+phases:
+  - name: phase1-console
+    branch: 001-phase-basic-todo
+    features: [task-crud-console]
+    status: completed
+    description: "In-memory Python console app with 5 core features"
+    
+  - name: phase2-web
+    branch: 002-phase-web-app
+    features: [task-crud-web, authentication, persistent-storage]
+    status: in-progress
+    description: "Full-stack web application with Next.js, FastAPI, Neon PostgreSQL, Better Auth"
+    
+  - name: phase3-chatbot
+    branch: 003-phase-chatbot
+    features: [task-crud-web, authentication, persistent-storage, ai-chatbot, mcp-integration]
+    status: planned
+    description: "AI chatbot interface with MCP tool integration"
+
+tech_stack:
+  phase2:
+    frontend:
+      framework: Next.js 16+
+      router: App Router
+      language: TypeScript
+      styling: Tailwind CSS
+      auth: Better Auth
+    backend:
+      framework: FastAPI
+      language: Python 3.13+
+      orm: SQLModel
+      database: Neon Serverless PostgreSQL
+      auth: JWT verification
+    deployment:
+      containerization: Docker Compose
+      
+conventions:
+  commit_format: conventional-commits
+  branch_naming: "{phase-number}-{phase-name}"
+  test_coverage: ">=80%"
+  architecture: clean-architecture
+  development: spec-driven + tdd
