@@ -66,3 +66,9 @@ npm test                      # Run React tests
 
 ---
 For detailed patterns, see `frontend/CLAUDE.md` and `backend/CLAUDE.md`
+
+## Active Technologies
+- Neon Serverless PostgreSQL 15+ (cloud-hosted, connection pooling included) (002-phase-web-app)
+
+## Recent Changes
+- 002-phase-web-app: Added Neon Serverless PostgreSQL 15+ (cloud-hosted, connection pooling included)
