@@ -112,3 +112,62 @@ def test_signup_invalid_email(client):
     )
 
     assert response.status_code == 422  # Pydantic validation error
+
+
+def test_signin_success(client):
+    """Test successful user signin."""
+    # First create a user
+    client.post(
+        "/api/auth/signup",
+        json={
+            "email": "test@example.com",
+            "name": "Test User",
+            "password": "SecurePass123!",
+        },
+    )
+
+    # Now sign in
+    response = client.post(
+        "/api/auth/signin",
+        json={"email": "test@example.com", "password": "SecurePass123!"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "token" in data
+    assert data["user"]["email"] == "test@example.com"
+    assert data["user"]["name"] == "Test User"
+    assert "expires_at" in data
+
+
+def test_signin_wrong_password(client):
+    """Test signin with incorrect password."""
+    # First create a user
+    client.post(
+        "/api/auth/signup",
+        json={
+            "email": "test@example.com",
+            "name": "Test User",
+            "password": "SecurePass123!",
+        },
+    )
+
+    # Try to sign in with wrong password
+    response = client.post(
+        "/api/auth/signin",
+        json={"email": "test@example.com", "password": "WrongPassword123!"},
+    )
+
+    assert response.status_code == 401
+    assert "incorrect" in response.json()["detail"].lower()
+
+
+def test_signin_nonexistent_email(client):
+    """Test signin with email that doesn't exist."""
+    response = client.post(
+        "/api/auth/signin",
+        json={"email": "nonexistent@example.com", "password": "SomePass123!"},
+    )
+
+    assert response.status_code == 401
+    assert "incorrect" in response.json()["detail"].lower()

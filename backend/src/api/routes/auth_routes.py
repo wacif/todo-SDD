@@ -9,6 +9,7 @@ from sqlmodel import Session
 from src.api.models.auth_models import AuthResponse, SigninRequest, SignupRequest
 from src.api.validators import validate_password
 from src.application.dto.user_input_dto import UserSignupDTO
+from src.application.use_cases.signin import InvalidCredentialsError, SigninUseCase
 from src.application.use_cases.signup import SignupUseCase
 from src.domain.exceptions.domain_exceptions import DuplicateEntityError, ValidationError
 from src.domain.repositories.user_repository import UserRepository
@@ -66,3 +67,36 @@ async def signup(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     except ValidationError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post("/signin", response_model=dict, status_code=status.HTTP_200_OK)
+async def signin(
+    request: SigninRequest,
+    user_repository: UserRepository = Depends(get_user_repository),
+):
+    """
+    Authenticate user and receive JWT token.
+
+    - Verifies email exists
+    - Verifies password matches
+    - Returns JWT token with user data and expiration
+    """
+    try:
+        # Execute signin use case
+        signin_use_case = SigninUseCase(user_repository)
+        result = signin_use_case.execute(request.email, request.password)
+
+        return {
+            "token": result.token,
+            "user": {
+                "id": str(result.user.id),
+                "email": result.user.email,
+                "name": result.user.name,
+            },
+            "expires_at": result.expires_at.isoformat() + "Z",
+        }
+    except InvalidCredentialsError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email or password is incorrect",
+        )
