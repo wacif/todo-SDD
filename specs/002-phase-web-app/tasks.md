@@ -56,16 +56,16 @@ This document provides a dependency-ordered task breakdown for implementing Phas
 
 ### Tasks
 
-- [ ] T001 Create backend directory structure: backend/src/{api,application,domain,infrastructure}
-- [ ] T002 Create frontend directory structure: frontend/app/{(auth),(dashboard)}/components/lib
-- [ ] T003 Initialize backend Python environment with uv and create pyproject.toml
-- [ ] T004 Initialize frontend Node.js project with npm and create package.json
-- [ ] T005 [P] Configure backend dependencies in pyproject.toml (FastAPI, SQLModel, PyJWT, Alembic, pytest)
-- [ ] T006 [P] Configure frontend dependencies in package.json (Next.js 16, React 19, Better Auth, Tailwind CSS)
-- [ ] T007 [P] Create backend/.env.example with DATABASE_URL, BETTER_AUTH_SECRET, CORS_ORIGINS
-- [ ] T008 [P] Create frontend/.env.local.example with NEXT_PUBLIC_API_URL, BETTER_AUTH_SECRET
-- [ ] T009 Setup Neon PostgreSQL database and obtain connection string
-- [ ] T010 Configure docker-compose.yml for local development (frontend, backend, database)
+- [X] T001 Create backend directory structure: backend/src/{api,application,domain,infrastructure}
+- [X] T002 Create frontend directory structure: frontend/app/{(auth),(dashboard)}/components/lib
+- [X] T003 Initialize backend Python environment with uv and create pyproject.toml
+- [X] T004 Initialize frontend Node.js project with npm and create package.json
+- [X] T005 [P] Configure backend dependencies in pyproject.toml (FastAPI, SQLModel, PyJWT, Alembic, pytest)
+- [X] T006 [P] Configure frontend dependencies in package.json (Next.js 16, React 19, Better Auth, Tailwind CSS)
+- [X] T007 [P] Create backend/.env.example with DATABASE_URL, BETTER_AUTH_SECRET, CORS_ORIGINS
+- [X] T008 [P] Create frontend/.env.local.example with NEXT_PUBLIC_API_URL, BETTER_AUTH_SECRET
+- [X] T009 Setup Neon PostgreSQL database and obtain connection string
+- [X] T010 Configure docker-compose.yml for local development (frontend, backend, database)
 
 **Test Criteria**:
 - ✅ `cd backend && uv pip install` succeeds
@@ -84,21 +84,21 @@ This document provides a dependency-ordered task breakdown for implementing Phas
 
 ### Tasks
 
-- [ ] T011 [P] Copy Task entity from src/domain/entities/task.py to backend/src/domain/entities/task.py
-- [ ] T012 [P] Create User entity in backend/src/domain/entities/user.py with SQLModel table definition
-- [ ] T013 [P] Create TaskRepository protocol in backend/src/domain/repositories/task_repository.py
-- [ ] T014 [P] Create UserRepository protocol in backend/src/domain/repositories/user_repository.py
-- [ ] T015 [P] Copy all 5 use cases from src/application/use_cases/ to backend/src/application/use_cases/
-- [ ] T016 [P] Copy DTOs from src/application/dto/ to backend/src/application/dto/
-- [ ] T017 Create database connection in backend/src/infrastructure/database.py (SQLModel engine, session factory)
-- [ ] T018 Implement PostgresTaskRepository in backend/src/infrastructure/repositories/postgres_task_repository.py
-- [ ] T019 Implement PostgresUserRepository in backend/src/infrastructure/repositories/postgres_user_repository.py
-- [ ] T020 Create Alembic migration 001_initial_schema.sql in backend/migrations/versions/
-- [ ] T021 [P] Write unit tests for PostgresTaskRepository in backend/tests/unit/test_postgres_task_repository.py
-- [ ] T022 [P] Write unit tests for PostgresUserRepository in backend/tests/unit/test_postgres_user_repository.py
-- [ ] T023 Create FastAPI app entry point in backend/main.py with CORS and health check endpoint
-- [ ] T024 [P] Setup Tailwind CSS configuration in frontend/tailwind.config.js
-- [ ] T025 [P] Create base layout in frontend/app/layout.tsx with Better Auth provider
+- [X] T011 [P] Copy Task entity from src/domain/entities/task.py to backend/src/domain/entities/task.py
+- [X] T012 [P] Create User entity in backend/src/domain/entities/user.py with SQLModel table definition
+- [X] T013 [P] Create TaskRepository protocol in backend/src/domain/repositories/task_repository.py
+- [X] T014 [P] Create UserRepository protocol in backend/src/domain/repositories/user_repository.py
+- [X] T015 [P] Copy all 5 use cases from src/application/use_cases/ to backend/src/application/use_cases/
+- [X] T016 [P] Copy DTOs from src/application/dto/ to backend/src/application/dto/
+- [X] T017 Create database connection in backend/src/infrastructure/database.py (SQLModel engine, session factory)
+- [X] T018 Implement PostgresTaskRepository in backend/src/infrastructure/repositories/postgres_task_repository.py
+- [X] T019 Implement PostgresUserRepository in backend/src/infrastructure/repositories/postgres_user_repository.py
+- [X] T020 Create Alembic migration 001_initial_schema.sql in backend/migrations/versions/
+- [X] T021 [P] Write unit tests for PostgresTaskRepository in backend/tests/unit/test_postgres_task_repository.py
+- [X] T022 [P] Write unit tests for PostgresUserRepository in backend/tests/unit/test_postgres_user_repository.py
+- [X] T023 Create FastAPI app entry point in backend/main.py with CORS and health check endpoint
+- [X] T024 [P] Setup Tailwind CSS configuration in frontend/tailwind.config.js
+- [X] T025 [P] Create base layout in frontend/app/layout.tsx with Better Auth provider
 
 **Test Criteria**:
 - ✅ `pytest backend/tests/unit/test_postgres_task_repository.py` passes
@@ -118,14 +118,14 @@ This document provides a dependency-ordered task breakdown for implementing Phas
 
 ### Tasks
 
-- [ ] T026 [P] [US1] Create Pydantic SignupRequest model in backend/src/api/models/auth_models.py
-- [ ] T027 [P] [US1] Create POST /api/auth/signup route in backend/src/api/auth_routes.py
-- [ ] T028 [US1] Implement password hashing with bcrypt (cost factor 12) in backend/src/infrastructure/security.py
-- [ ] T029 [US1] Implement email validation (RFC 5322) in backend/src/api/validators.py
-- [ ] T030 [US1] Add unique email constraint handling (409 Conflict response)
-- [ ] T031 [P] [US1] Write integration test for signup endpoint in backend/tests/integration/test_auth_routes.py
-- [ ] T032 [P] [US1] Create signup page UI in frontend/app/(auth)/signup/page.tsx
-- [ ] T033 [US1] Create AuthForm component in frontend/components/auth/AuthForm.tsx (reusable for login/signup)
+- [X] T026 [P] [US1] Create Pydantic SignupRequest model in backend/src/api/models/auth_models.py
+- [X] T027 [P] [US1] Create POST /api/auth/signup route in backend/src/api/auth_routes.py
+- [X] T028 [US1] Implement password hashing with bcrypt (cost factor 12) in backend/src/infrastructure/security.py
+- [X] T029 [US1] Implement email validation (RFC 5322) in backend/src/api/validators.py
+- [X] T030 [US1] Add unique email constraint handling (409 Conflict response)
+- [X] T031 [P] [US1] Write integration test for signup endpoint in backend/tests/integration/test_auth_routes.py
+- [X] T032 [P] [US1] Create signup page UI in frontend/app/(auth)/signup/page.tsx
+- [X] T033 [US1] Create AuthForm component in frontend/components/auth/AuthForm.tsx (reusable for login/signup)
 
 **Test Criteria**:
 - ✅ POST /api/auth/signup with valid data creates user and returns 201
@@ -152,13 +152,13 @@ curl -X POST http://localhost:8000/api/auth/signup \
 
 ### Tasks
 
-- [ ] T034 [P] [US2] Create Pydantic SigninRequest model in backend/src/api/models/auth_models.py
-- [ ] T035 [P] [US2] Create POST /api/auth/signin route in backend/src/api/auth_routes.py
-- [ ] T036 [US2] Implement JWT token generation (HS256, 7-day expiry) in backend/src/infrastructure/jwt.py
-- [ ] T037 [US2] Implement password verification against bcrypt hash
-- [ ] T038 [US2] Create JWT middleware for token verification in backend/src/api/dependencies.py (get_current_user)
-- [ ] T039 [P] [US2] Write integration test for signin endpoint in backend/tests/integration/test_auth_routes.py
-- [ ] T040 [P] [US2] Create login page UI in frontend/app/(auth)/login/page.tsx
+- [X] T034 [P] [US2] Create Pydantic SigninRequest model in backend/src/api/models/auth_models.py
+- [X] T035 [P] [US2] Create POST /api/auth/signin route in backend/src/api/auth_routes.py
+- [X] T036 [US2] Implement JWT token generation (HS256, 7-day expiry) in backend/src/infrastructure/jwt.py
+- [X] T037 [US2] Implement password verification against bcrypt hash
+- [X] T038 [US2] Create JWT middleware for token verification in backend/src/api/dependencies.py (get_current_user)
+- [X] T039 [P] [US2] Write integration test for signin endpoint in backend/tests/integration/test_auth_routes.py
+- [X] T040 [P] [US2] Create login page UI in frontend/app/(auth)/login/page.tsx
 
 **Test Criteria**:
 - ✅ POST /api/auth/signin with correct credentials returns JWT token
