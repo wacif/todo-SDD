@@ -186,16 +186,16 @@ curl -X POST http://localhost:8000/api/auth/signin \
 
 ### Tasks
 
-- [ ] T041 [P] [US3] Create Pydantic TaskInputDTO model in backend/src/api/models/task_models.py
-- [ ] T042 [P] [US3] Create POST /api/{user_id}/tasks route in backend/src/api/task_routes.py
-- [ ] T043 [US3] Wire AddTaskUseCase with JWT middleware (inject authenticated user_id)
-- [ ] T044 [US3] Add user_id ownership validation (403 if URL user_id != token user_id)
-- [ ] T045 [US3] Add title/description validation (1-200 chars, 0-1000 chars)
-- [ ] T046 [P] [US3] Write integration test for create task endpoint in backend/tests/integration/test_task_routes.py
-- [ ] T047 [P] [US3] Create TaskForm component in frontend/components/tasks/TaskForm.tsx
-- [ ] T048 [P] [US3] Create task creation page in frontend/app/(dashboard)/tasks/new/page.tsx
-- [ ] T049 [P] [US3] Create API client method createTask in frontend/lib/api.ts (axios with JWT injection)
-- [ ] T050 [US3] Wire TaskForm to API client and handle success/error states
+- [X] T041 [P] [US3] Create Pydantic TaskInputDTO model in backend/src/api/models/task_models.py
+- [X] T042 [P] [US3] Create POST /api/{user_id}/tasks route in backend/src/api/task_routes.py
+- [X] T043 [US3] Wire AddTaskUseCase with JWT middleware (inject authenticated user_id)
+- [X] T044 [US3] Add user_id ownership validation (403 if URL user_id != token user_id)
+- [X] T045 [US3] Add title/description validation (1-200 chars, 0-1000 chars)
+- [X] T046 [P] [US3] Write integration test for create task endpoint in backend/tests/integration/test_task_routes.py
+- [X] T047 [P] [US3] Create TaskForm component in frontend/components/tasks/TaskForm.tsx
+- [X] T048 [P] [US3] Create task creation page in frontend/app/(dashboard)/tasks/new/page.tsx
+- [X] T049 [P] [US3] Create API client method createTask in frontend/lib/api.ts (axios with JWT injection)
+- [X] T050 [US3] Wire TaskForm to API client and handle success/error states
 
 **Test Criteria**:
 - ✅ POST /api/{user_id}/tasks with valid data creates task and returns 201
