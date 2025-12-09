@@ -35,7 +35,7 @@ class Task:
     id: int
     user_id: UUID
     title: str
-    description: str
+    description: str | None
     completed: bool
     created_at: datetime
     updated_at: datetime
@@ -51,10 +51,11 @@ class Task:
             raise ValidationError("Title cannot exceed 200 characters")
 
         # Description validation
-        if not isinstance(self.description, str):
-            raise ValidationError("Description must be a string")
-        if len(self.description) > 1000:
-            raise ValidationError("Description cannot exceed 1000 characters")
+        if self.description is not None:
+            if not isinstance(self.description, str):
+                raise ValidationError("Description must be a string")
+            if len(self.description) > 1000:
+                raise ValidationError("Description cannot exceed 1000 characters")
 
         # ID validation
         if not isinstance(self.id, int) or self.id < 0:

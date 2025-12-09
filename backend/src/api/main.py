@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.routes.auth_routes import router as auth_router
+from src.api.routes.task_routes import router as task_router
 from src.infrastructure.config.settings import settings
 
 app = FastAPI(
@@ -24,6 +25,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(task_router)
 
 
 @app.get("/health")

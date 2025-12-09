@@ -16,7 +16,7 @@ class TaskInputDTO:
 
     user_id: UUID
     title: str
-    description: str = ""
+    description: Optional[str] = None
     completed: bool = False
 
 
