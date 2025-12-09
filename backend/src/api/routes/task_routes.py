@@ -13,6 +13,7 @@ from src.application.dto.task_dto import TaskDTO
 from src.application.dto.task_input_dto import TaskInputDTO as UseCaseTaskInputDTO
 from src.application.use_cases.add_task import AddTaskUseCase
 from src.application.use_cases.list_tasks import ListTasksUseCase
+from src.application.use_cases.mark_task_complete import MarkTaskCompleteUseCase
 from src.domain.exceptions.domain_exceptions import (
     EntityNotFoundError,
     UnauthorizedError,
@@ -141,3 +142,40 @@ async def list_tasks(
 
     except EntityNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.patch("/{user_id}/tasks/{task_id}/complete", response_model=TaskResponse)
+async def toggle_task_complete(
+    user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
+    task_id: Annotated[int, Path(description="Task ID to toggle completion status")],
+    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
+    task_repository: TaskRepository = Depends(get_task_repository),
+):
+    """
+    Toggle task completion status.
+
+    - Requires JWT authentication
+    - User can only toggle their own tasks
+    - Toggles between completed and incomplete states
+    """
+    # Validate user ownership
+    validate_user_ownership(user_id, current_user_id)
+
+    try:
+        # First, get the current task to determine its completed state
+        current_task = task_repository.get_by_id(task_id, current_user_id)
+        
+        # Toggle the completion status
+        new_completed_status = not current_task.completed
+        
+        # Execute use case with toggled status
+        use_case = MarkTaskCompleteUseCase(task_repository)
+        task_dto = use_case.execute(task_id, current_user_id, new_completed_status)
+
+        # Convert to API response
+        return task_dto_to_response(task_dto)
+
+    except EntityNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except UnauthorizedError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))

@@ -6,10 +6,14 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
+from src.infrastructure.config.settings import settings
 from src.infrastructure.persistence.models import TaskModel, UserModel
 
 # This is the Alembic Config object
 config = context.config
+
+# Override sqlalchemy.url with the one from our settings
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:

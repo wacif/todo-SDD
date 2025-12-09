@@ -252,3 +252,67 @@ def test_user_isolation(client, auth_user):
     data2 = response2.json()
     assert len(data2["tasks"]) == 1
     assert data2["tasks"][0]["title"] == "User 2 task"
+
+
+def test_toggle_task_complete_success(client, auth_user):
+    """Test successfully toggling task completion status."""
+    # Create a task
+    create_response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Task to complete"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert create_response.status_code == 201
+    task_id = create_response.json()["id"]
+    assert create_response.json()["completed"] is False
+
+    # Toggle to completed
+    toggle_response = client.patch(
+        f"/api/{auth_user['user_id']}/tasks/{task_id}/complete",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert toggle_response.status_code == 200
+    assert toggle_response.json()["completed"] is True
+    assert toggle_response.json()["id"] == task_id
+
+    # Toggle back to incomplete
+    toggle_response2 = client.patch(
+        f"/api/{auth_user['user_id']}/tasks/{task_id}/complete",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert toggle_response2.status_code == 200
+    assert toggle_response2.json()["completed"] is False
+
+
+def test_toggle_task_complete_without_jwt(client, auth_user):
+    """Test toggling task completion without JWT token."""
+    response = client.patch(f"/api/{auth_user['user_id']}/tasks/1/complete")
+    assert response.status_code == 401
+
+
+def test_toggle_task_complete_mismatched_user_id(client, auth_user):
+    """Test toggling task with mismatched user_id in path."""
+    # Create a task first
+    create_response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "My task"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    task_id = create_response.json()["id"]
+
+    # Try to toggle with different user_id
+    fake_user_id = "550e8400-e29b-41d4-a716-446655440000"
+    response = client.patch(
+        f"/api/{fake_user_id}/tasks/{task_id}/complete",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 403
+
+
+def test_toggle_task_complete_nonexistent_task(client, auth_user):
+    """Test toggling a task that doesn't exist."""
+    response = client.patch(
+        f"/api/{auth_user['user_id']}/tasks/99999/complete",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 404
