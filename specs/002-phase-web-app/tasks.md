@@ -10,6 +10,7 @@
 This document provides a dependency-ordered task breakdown for implementing Phase II. Tasks are organized by user story to enable independent implementation and testing. Each phase represents a complete, shippable increment.
 
 **Total Tasks**: 85  
+**Completed Tasks**: 65/85 (76%)  
 **User Stories**: 7 (US-W1 to US-W7)  
 **Estimated Duration**: 5-8 days
 
@@ -225,14 +226,14 @@ curl -X POST http://localhost:8000/api/{user_id}/tasks \
 
 ### Tasks
 
-- [ ] T051 [P] [US4] Create GET /api/{user_id}/tasks route in backend/src/api/task_routes.py
-- [ ] T052 [US4] Wire ListTasksUseCase with JWT middleware and user_id filtering
-- [ ] T053 [US4] Add query optimization (index on user_id, created_at)
-- [ ] T054 [P] [US4] Write integration test for list tasks endpoint in backend/tests/integration/test_task_routes.py
-- [ ] T055 [P] [US4] Create TaskCard component in frontend/components/tasks/TaskCard.tsx
-- [ ] T056 [P] [US4] Create TaskList component in frontend/components/tasks/TaskList.tsx
-- [ ] T057 [P] [US4] Create tasks list page in frontend/app/(dashboard)/tasks/page.tsx
-- [ ] T058 [US4] Create API client method listTasks in frontend/lib/api.ts
+- [X] T051 [P] [US4] Create GET /api/{user_id}/tasks route in backend/src/api/task_routes.py
+- [X] T052 [US4] Wire ListTasksUseCase with JWT middleware and user_id filtering
+- [X] T053 [US4] Add query optimization (index on user_id, created_at)
+- [X] T054 [P] [US4] Write integration test for list tasks endpoint in backend/tests/integration/test_task_routes.py
+- [X] T055 [P] [US4] Create TaskCard component in frontend/components/tasks/TaskCard.tsx
+- [X] T056 [P] [US4] Create TaskList component in frontend/components/tasks/TaskList.tsx
+- [X] T057 [P] [US4] Create tasks list page in frontend/app/(dashboard)/tasks/page.tsx
+- [X] T058 [US4] Create API client method listTasks in frontend/lib/api.ts
 
 **Test Criteria**:
 - ✅ GET /api/{user_id}/tasks returns only authenticated user's tasks
@@ -250,7 +251,7 @@ curl http://localhost:8000/api/{user_id}/tasks \
 
 ---
 
-## Phase 7: US-W5 - Mark Complete (P3)
+## Phase 7: US-W5 - Mark Complete (P3) ✅
 
 **Goal**: Users can toggle task completion status  
 **Duration**: 3-4 hours  
@@ -259,13 +260,13 @@ curl http://localhost:8000/api/{user_id}/tasks \
 
 ### Tasks
 
-- [ ] T059 [P] [US5] Create PATCH /api/{user_id}/tasks/{id}/complete route in backend/src/api/task_routes.py
-- [ ] T060 [US5] Wire MarkTaskCompleteUseCase with JWT middleware
-- [ ] T061 [US5] Add task ownership validation (user_id match)
-- [ ] T062 [P] [US5] Write integration test for complete endpoint in backend/tests/integration/test_task_routes.py
-- [ ] T063 [P] [US5] Add toggle button to TaskCard component in frontend/components/tasks/TaskCard.tsx
-- [ ] T064 [P] [US5] Create API client method toggleComplete in frontend/lib/api.ts
-- [ ] T065 [US5] Add optimistic UI update for task completion status
+- [X] T059 [P] [US5] Create PATCH /api/{user_id}/tasks/{id}/complete route in backend/src/api/task_routes.py
+- [X] T060 [US5] Wire MarkTaskCompleteUseCase with JWT middleware
+- [X] T061 [US5] Add task ownership validation (user_id match)
+- [X] T062 [P] [US5] Write integration test for complete endpoint in backend/tests/integration/test_task_routes.py
+- [X] T063 [P] [US5] Add toggle button to TaskCard component in frontend/components/tasks/TaskCard.tsx
+- [X] T064 [P] [US5] Create API client method toggleComplete in frontend/lib/api.ts
+- [X] T065 [US5] Add optimistic UI update for task completion status
 
 **Test Criteria**:
 - ✅ PATCH /api/{user_id}/tasks/{id}/complete toggles status and returns 200

@@ -118,6 +118,40 @@ export async function listTasks(userId: string): Promise<TaskListResponse> {
 }
 
 /**
+ * Toggle task completion status
+ */
+export async function toggleComplete(
+  userId: string,
+  taskId: number
+): Promise<Task> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new ApiError('Not authenticated', 401);
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/${userId}/tasks/${taskId}/complete`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new ApiError(
+      error.detail || 'Failed to toggle task completion',
+      response.status,
+      error
+    );
+  }
+
+  return response.json();
+}
+
+/**
  * Get a single task by ID
  */
 export async function getTask(userId: string, taskId: number): Promise<Task> {
