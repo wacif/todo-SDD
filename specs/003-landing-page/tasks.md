@@ -1,114 +1,315 @@
-# Tasks: Professional Landing Page & Website Design
+# Tasks: Professional Frontend UI Design
 
-**Feature Branch**: `003-landing-page` | **Date**: 2025-12-10 | **Plan**: specs/003-landing-page/plan.md
-**Input**: Specification `specs/003-landing-page/spec.md`, Data Model `specs/003-landing-page/data-model.md`
+**Input**: Design documents from `/specs/003-landing-page/`  
+**Prerequisites**: plan.md, spec.md, data-model.md, contracts/, research.md, quickstart.md
 
-## Overview
+**Tests**: Test tasks included based on TDD requirement from constitution and spec acceptance scenarios.
 
-This list breaks down the implementation of the professional landing page into sequential and parallelized, independently testable tasks, organized by user story priority. The primary goal is achieving high Lighthouse scores (Perf 90+, A11y 95+) with modern SaaS visual design.
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
-## Phase 1: Setup & Data Contracts (T001-T004)
+## Format: `- [ ] [ID] [P?] [Story?] Description`
 
-*Goal: Establish all non-functional prerequisites (types, content, directories) before component development.*
+- **[P]**: Can run in parallel (different files, no dependencies)
+- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- Include exact file paths in descriptions
 
-- [X] T001 Create component directory `frontend/src/components/landing/`
-- [X] T002 Create type definitions (interfaces) in `frontend/lib/types/landing.ts`
-- [X] T003 Create content constants with realistic placeholders in `frontend/lib/constants/landing-content.ts`
-- [X] T004 Create E2E test boilerplate in `frontend/tests/e2e/landing.spec.ts`
+---
 
-## Phase 2: Foundational Components (T005-T009)
+## Phase 1: Setup (Shared Infrastructure)
 
-*Goal: Implement the required navigation and footer, which are common to all pages.*
+**Purpose**: Install dependencies and create foundational utilities
 
-- [X] T005 [P] Create `Footer.tsx` component (FR-006) in `frontend/src/components/landing/Footer.tsx`
-- [X] T006 [P] Create unit test `Footer.test.tsx` for T005 in `frontend/tests/components/landing/Footer.test.tsx`
-- [X] T007 Create `LandingNav.tsx` component (FR-004) in `frontend/src/components/landing/LandingNav.tsx`
-- [X] T008 Create unit test `LandingNav.test.tsx` for T007 in `frontend/tests/components/landing/LandingNav.test.tsx`
-- [X] T009 Implement sticky navigation logic (FR-012) in `frontend/src/components/landing/LandingNav.tsx`
+- [X] T001 Install CVA dependencies: `cd frontend && npm install class-variance-authority clsx tailwind-merge`
+- [X] T002 Install accessibility testing: `cd frontend && npm install --save-dev @axe-core/react`
+- [X] T003 [P] Create utility function in frontend/src/lib/utils.ts
+- [X] T004 [P] Configure test setup file in frontend/tests/setup.ts
 
-## Phase 3: US1 (P1) - First-Time Visitor Conversion (Hero) (T010-T012)
+---
 
-*Goal: Implement the core above-the-fold conversion area.*
-**Independent Test**: Visit `/` and verify hero, headline, primary CTA, and visual element are present and accessible.
+## Phase 2: Foundational (Design System Foundation)
 
-- [X] T010 [US1] Create `Hero.tsx` component (FR-001, FR-013) in `frontend/src/components/landing/Hero.tsx`
-- [X] T011 [US1] Create unit test `Hero.test.tsx` for T010 in `frontend/tests/components/landing/Hero.test.tsx`
-- [X] T012 [US1] Implement subtle animation on hero content (FR-009) using CSS/Intersection Observer in `frontend/src/components/landing/Hero.tsx`
+**Purpose**: Design tokens and core infrastructure that ALL components depend on
 
-## Phase 4: US5 (P1) - Visual Engagement & Modern Design (T013-T014)
+**⚠️ CRITICAL**: No component work can begin until this phase is complete
 
-*Goal: Apply cross-cutting design principles to existing components.*
-**Independent Test**: Visual inspection to confirm Modern SaaS style, responsive layout, and proper typography/spacing.
+- [X] T005 Define CSS custom properties in frontend/app/globals.css
+- [X] T006 Extend Tailwind config in frontend/tailwind.config.js
+- [X] T007 Create design token constants in frontend/src/lib/constants/colors.ts
+- [X] T008 [P] Create typography constants in frontend/src/lib/constants/typography.ts
+- [X] T009 [P] Create spacing constants in frontend/src/lib/constants/spacing.ts
 
-- [X] T013 [P] [US5] Extend Tailwind config for Modern SaaS styling (FR-011) in `frontend/tailwind.config.js`
-- [X] T014 [US5] Apply cross-cutting responsive layout and visual polish (FR-005, FR-011) across T005, T007, T010.
+**Checkpoint**: Design system foundation ready - component implementation can now begin in parallel
 
-## Phase 5: US4 (P2) - Quick Access for Existing Users (T015-T016)
+---
 
-*Goal: Ensure navigation correctly handles logged-in state.*
-**Independent Test**: Simulate logged-in state and verify "Login" button changes to "Go to Dashboard" and directs correctly.
+## Phase 3: User Story 1 - Professional Landing Page Experience (Priority: P1) 🎯 MVP
 
-- [X] T015 [US4] Integrate `better-auth` hook into `LandingNav.tsx` to switch CTA (FR-007) in `frontend/src/components/landing/LandingNav.tsx`
-- [X] T016 [US4] Update E2E test T004 to cover authenticated/unauthenticated CTA states (US4 AC 69, 71) in `frontend/tests/e2e/landing.spec.ts`
+**Goal**: Deliver a polished, professional landing page with smooth interactions and responsive design
 
-## Phase 6: US2 (P2) - Social Proof & Trust Building (T017-T019)
+**Independent Test**: Visit localhost:3000/, verify modern design, test CTAs, check responsiveness on mobile/tablet/desktop
 
-*Goal: Implement the testimonials and usage statistics section.*
-**Independent Test**: Scroll past hero and verify social proof section loads with placeholder data.
+### Core UI Components (Required for All Stories)
 
-- [X] T017 [P] [US2] Create `TestimonialCard.tsx` component in `frontend/src/components/landing/TestimonialCard.tsx`
-- [X] T018 [US2] Create `SocialProof.tsx` component assembling social proof elements (FR-003) in `frontend/src/components/landing/SocialProof.tsx`
-- [X] T019 [US2] Create unit test `SocialProof.test.tsx` for T017 & T018 in `frontend/tests/components/landing/SocialProof.test.tsx`
+- [X] T010 [P] [US1] Write Button component test in frontend/tests/components/ui/button.test.tsx
+- [X] T011 [P] [US1] Implement Button component in frontend/src/components/ui/button.tsx
+- [X] T012 [P] [US1] Write Card component test in frontend/tests/components/ui/card.test.tsx
+- [X] T013 [P] [US1] Implement Card component in frontend/src/components/ui/card.tsx
 
-## Phase 7: US3 (P3) - Feature Exploration (T020-T023)
+### Landing Page Enhancement
 
-*Goal: Implement the features showcase and 'how it works' section.*
-**Independent Test**: Scroll to features section and verify 3-5 features and the workflow explanation are displayed clearly.
+- [X] T014 [US1] Update Hero component to use design tokens in frontend/src/components/landing/Hero.tsx
+- [X] T015 [US1] Update FeatureCard to use new Card component in frontend/src/components/landing/FeatureCard.tsx
+- [X] T016 [US1] Update Features section layout in frontend/src/components/landing/FeaturesSection.tsx
+- [X] T017 [US1] Update SocialProof styling with tokens in frontend/src/components/landing/SocialProof.tsx
+- [X] T018 [US1] Update Footer with navigation patterns in frontend/src/components/landing/Footer.tsx
+- [X] T019 [US1] Update LandingNav with consistent styling in frontend/src/components/landing/LandingNav.tsx
+- [X] T020 [US1] Update landing page root in frontend/app/page.tsx
+- [X] T021 [US1] Test landing page responsiveness and Lighthouse score
 
-- [X] T020 [P] [US3] Create `FeatureCard.tsx` component in `frontend/src/components/landing/FeatureCard.tsx`
-- [X] T021 [P] [US3] Create `FeaturesSection.tsx` component (FR-002) in `frontend/src/components/landing/FeaturesSection.tsx`
-- [X] T022 [P] [US3] Create `HowItWorks.tsx` component (FR-010) in `frontend/src/components/landing/HowItWorks.tsx`
-- [X] T023 [US3] Create unit test `Features.test.tsx` for T020, T021, T022 in `frontend/tests/components/landing/Features.test.tsx`
+**Checkpoint**: Landing page professional and responsive with 90+ Lighthouse score
 
-## Phase 8: Final Integration & Optimization (T024-T027)
+---
 
-*Goal: Final assembly, comprehensive testing, and performance tuning.*
+## Phase 4: User Story 2 - Seamless Authentication Experience (Priority: P1)
 
-- [X] T024 Integrate T018, T021, T022 sections into the main page in `frontend/src/app/page.tsx`
-- [X] T025 Implement lazy loading for images below the fold (FR-014) in all relevant components.
-- [X] T026 Run all unit and component tests (`npm test`) and fix any failures.
-- [X] T027 Run Lighthouse audit, optimize performance/accessibility to meet SC-002/SC-003.
-  * Note: Landing page components compile successfully. Full production build requires fixing login page useSearchParams() issue (unrelated to landing page).
+**Goal**: Deliver intuitive, professionally designed authentication flows with clear validation and feedback
 
-## Task Dependencies & Parallel Execution
+**Independent Test**: Complete signup at /signup and login at /signin, verify form validation, error states, success messaging
 
-### Story Completion Order
+### Form Components
 
-The following ordering ensures foundational components are implemented before their dependent stories:
+- [X] T022 [P] [US2] Write Input component test in frontend/tests/components/ui/input.test.tsx
+- [X] T023 [P] [US2] Implement Input component in frontend/src/components/ui/input.tsx
+- [X] T024 [P] [US2] Write Toast component test in frontend/tests/components/ui/toast.test.tsx
+- [X] T025 [P] [US2] Implement Toast component and provider in frontend/src/components/ui/toast.tsx
 
-1. **Phase 1: Setup** (T001-T004)
-2. **Phase 2: Foundational** (T005-T009)
-3. **Phase 3: US1 (P1)** (T010-T012)
-4. **Phase 4: US5 (P1)** (T013-T014)
-5. **Phase 5: US4 (P2)** (T015-T016)
-6. **Phase 6: US2 (P2)** (T017-T019)
-7. **Phase 7: US3 (P3)** (T020-T023)
-8. **Phase 8: Final Integration** (T024-T027)
+### Authentication Pages
 
-### Parallel Execution Opportunities
+- [X] T026 [US2] Create SignIn page with new components in frontend/app/signin/page.tsx
+- [X] T027 [US2] Create SignUp page with new components in frontend/app/signup/page.tsx
+- [X] T028 [US2] Add form validation with error states
+- [X] T029 [US2] Add loading states during authentication
+- [X] T030 [US2] Add success feedback with smooth transitions
+- [X] T031 [US2] Test authentication flow end-to-end
 
-Tasks marked with `[P]` can be executed in parallel as they have no file dependencies on other tasks within the same phase (e.g., component file creation and its corresponding test file creation).
+**Checkpoint**: Authentication experience is professional, clear, and friction-free
 
-**Example Parallel Execution Blocks**:
+---
 
-| Phase | Tasks | Description |
-|---|---|---|
-| Phase 2 | T005, T006 | Footer component + unit test can be built simultaneously. |
-| Phase 4 | T013 | Tailwind config extension can be done while T014 polish is being applied. |
-| Phase 6 | T017, T018, T019 | TestimonialCard, SocialProof component, and its tests can be created simultaneously. |
-| Phase 7 | T020, T021, T022 | FeatureCard, FeaturesSection, and HowItWorks components can be created simultaneously. |
-| Phase 8 | T025, T026, T027 | Testing and optimization tasks can be executed iteratively in parallel. |
+## Phase 5: User Story 3 - Efficient Task Management Dashboard (Priority: P1)
+
+**Goal**: Deliver professional, intuitive dashboard for task management with satisfying interactions
+
+**Independent Test**: Log in and access /dashboard, create task, edit task, mark complete, verify visual feedback and smooth transitions
+
+### Additional Components
+
+- [X] T032 [P] [US3] Write Modal component test in frontend/tests/components/ui/modal.test.tsx
+- [X] T033 [P] [US3] Implement Modal component in frontend/src/components/ui/modal.tsx
+- [X] T034 [P] [US3] Write Badge component test in frontend/tests/components/ui/badge.test.tsx
+- [X] T035 [P] [US3] Implement Badge component in frontend/src/components/ui/badge.tsx
+- [X] T036 [P] [US3] Write EmptyState component test in frontend/tests/components/ui/empty-state.test.tsx
+- [X] T037 [P] [US3] Implement EmptyState component in frontend/src/components/ui/empty-state.tsx
+
+### Dashboard Components
+
+- [X] T038 [US3] Create TaskCard component in frontend/src/components/dashboard/TaskCard.tsx
+- [X] T039 [US3] Create TaskList component in frontend/src/components/dashboard/TaskList.tsx
+- [X] T040 [US3] Create TaskForm component in frontend/src/components/dashboard/TaskForm.tsx
+- [X] T041 [US3] Create Navigation component in frontend/src/components/dashboard/Navigation.tsx
+
+### Dashboard Pages
+
+- [ ] T042 [US3] Redesign dashboard page in frontend/app/dashboard/page.tsx
+- [ ] T043 [US3] Implement task creation modal
+- [ ] T044 [US3] Implement task editing functionality
+- [ ] T045 [US3] Add visual feedback for task completion
+- [ ] T046 [US3] Add empty state for no tasks
+- [ ] T047 [US3] Test dashboard interactions and visual hierarchy
+
+**Checkpoint**: Dashboard is professional, interactions are smooth and satisfying
+
+---
+
+## Phase 6: User Story 4 - Consistent Cross-Platform Experience (Priority: P2)
+
+**Goal**: Ensure consistent professional design across all screen sizes (mobile, tablet, desktop)
+
+**Independent Test**: Test all pages on Chrome DevTools device emulation (iPhone, iPad, desktop), verify responsive behavior, check touch targets
+
+### Responsive Enhancements
+
+- [ ] T048 [P] [US4] Add mobile navigation menu in frontend/src/components/ui/mobile-nav.tsx
+- [ ] T049 [P] [US4] Write Drawer component for mobile menu in frontend/src/components/ui/drawer.tsx
+- [ ] T050 [US4] Test landing page responsiveness (320px to 2560px)
+- [ ] T051 [US4] Test authentication pages responsiveness
+- [ ] T052 [US4] Test dashboard responsiveness
+- [ ] T053 [US4] Verify touch target sizes (minimum 44x44px)
+- [ ] T054 [US4] Test viewport changes without layout breaks
+
+**Checkpoint**: All pages work flawlessly on mobile, tablet, and desktop
+
+---
+
+## Phase 7: User Story 5 - Accessible Professional Interface (Priority: P2)
+
+**Goal**: Ensure all users, including those with disabilities, can navigate and use the application
+
+**Independent Test**: Run axe DevTools, test keyboard navigation (Tab, Enter, Esc), verify screen reader announcements (NVDA/VoiceOver)
+
+### Accessibility Audit & Fixes
+
+- [ ] T055 [P] [US5] Run axe accessibility audit on landing page
+- [ ] T056 [P] [US5] Run axe accessibility audit on auth pages
+- [ ] T057 [P] [US5] Run axe accessibility audit on dashboard
+- [ ] T058 [US5] Fix any critical violations found in audits
+- [ ] T059 [US5] Add skip-to-content link in frontend/app/layout.tsx
+- [ ] T060 [US5] Verify keyboard navigation flow on all pages
+- [ ] T061 [US5] Test focus visible states on all interactive elements
+- [ ] T062 [US5] Verify ARIA labels and descriptions
+- [ ] T063 [US5] Test with screen reader (NVDA or VoiceOver)
+- [ ] T064 [US5] Verify color contrast ratios (WCAG AA 4.5:1)
+
+**Checkpoint**: Application is fully accessible with zero critical violations
+
+---
+
+## Phase 8: Polish & Cross-Cutting Concerns
+
+**Purpose**: Final enhancements, performance optimization, and quality assurance
+
+### Performance Optimization
+
+- [ ] T065 [P] Implement lazy loading for heavy components using next/dynamic
+- [ ] T066 [P] Optimize images with Next.js Image component
+- [ ] T067 [P] Add loading skeletons in frontend/src/components/ui/skeleton.tsx
+- [ ] T068 Minimize layout shifts by defining image dimensions
+- [ ] T069 Respect prefers-reduced-motion in animations
+
+### Final Quality Checks
+
+- [ ] T070 Run Lighthouse audit on all pages (target: 90+ performance & accessibility)
+- [ ] T071 Test with slow 3G throttling
+- [ ] T072 Verify all 23+ existing tests still pass
+- [ ] T073 Add new component tests (target: 30+ total tests)
+- [ ] T074 Test edge cases (long task titles, empty states, errors)
+- [ ] T075 Verify build succeeds: `npm run build`
+- [ ] T076 Test production bundle: `npm run start`
+
+### Documentation
+
+- [ ] T077 [P] Document component usage in frontend/src/components/ui/README.md
+- [ ] T078 [P] Add JSDoc comments to all component props
+- [ ] T079 Update CLAUDE.md with design system patterns
+
+**Checkpoint**: All quality gates passed, ready for production
+
+---
 
 ## Implementation Strategy
 
-We will proceed with a **Component-First MVP** approach. The Minimum Viable Product will consist of the Navigation, Footer, and Hero section (Phases 1-3). After the MVP is visually complete and responsive, we will incrementally add the remaining content sections (Social Proof, Features, How It Works) in priority order. All implementation will strictly follow the Test-Driven Development (TDD) principles as mandated by the project constitution.
+### MVP Scope (Minimum Viable Product)
+
+**Recommended MVP**: User Story 1 (Landing Page) + Core Components
+
+This delivers immediate value:
+- Professional first impression for new visitors
+- Foundation (Button, Card, Input) enables rapid feature development
+- Can be released independently to validate design system
+
+### Incremental Delivery
+
+1. **Week 1**: Phase 1-3 (Setup + Foundation + Landing Page)
+2. **Week 2**: Phase 4-5 (Auth + Dashboard)
+3. **Week 3**: Phase 6-8 (Responsive + Accessibility + Polish)
+
+### Parallel Execution Opportunities
+
+**Phase 2 (Foundational)**:
+- T007, T008, T009 can run in parallel (different files)
+
+**Phase 3 (Landing Page)**:
+- T010-T013 (Button/Card tests and implementation) can run in parallel
+- T014-T019 (landing component updates) depend on T010-T013 complete
+
+**Phase 4 (Auth)**:
+- T022-T025 (Input/Toast) can run in parallel
+- T026-T027 (Auth pages) can run in parallel after T022-T025
+
+**Phase 5 (Dashboard)**:
+- T032-T037 (Modal/Badge/EmptyState) can run in parallel
+- T038-T041 (Dashboard components) can run in parallel after T032-T037
+
+**Phase 6 (Responsive)**:
+- T048-T049 (Mobile nav) can run in parallel
+- T050-T054 (responsive tests) can run in parallel after T048-T049
+
+**Phase 7 (Accessibility)**:
+- T055-T057 (audits) can run in parallel
+- T060-T064 (manual tests) can run in parallel after T058 fixes
+
+**Phase 8 (Polish)**:
+- T065-T069 (performance) can run in parallel
+- T077-T079 (documentation) can run in parallel
+
+---
+
+## Dependencies & Completion Order
+
+```mermaid
+graph TD
+    Setup[Phase 1: Setup] --> Foundation[Phase 2: Foundation]
+    Foundation --> US1[Phase 3: Landing Page - P1]
+    Foundation --> US2[Phase 4: Auth - P1]
+    Foundation --> US3[Phase 5: Dashboard - P1]
+    US1 --> US4[Phase 6: Responsive - P2]
+    US2 --> US4
+    US3 --> US4
+    US4 --> US5[Phase 7: Accessibility - P2]
+    US5 --> Polish[Phase 8: Polish]
+```
+
+**Critical Path**: Setup → Foundation → Any User Story → Responsive → Accessibility → Polish
+
+**User Story Independence**:
+- US1, US2, US3 can be implemented in ANY order after Foundation
+- US4 (Responsive) requires ALL pages to exist (US1, US2, US3 complete)
+- US5 (Accessibility) should be done after all pages are built
+
+---
+
+## Task Count Summary
+
+- **Phase 1 (Setup)**: 4 tasks
+- **Phase 2 (Foundation)**: 5 tasks
+- **Phase 3 (Landing - US1)**: 12 tasks
+- **Phase 4 (Auth - US2)**: 10 tasks
+- **Phase 5 (Dashboard - US3)**: 16 tasks
+- **Phase 6 (Responsive - US4)**: 7 tasks
+- **Phase 7 (Accessibility - US5)**: 10 tasks
+- **Phase 8 (Polish)**: 15 tasks
+
+**Total**: 79 tasks
+
+**Parallel Opportunities**: ~35 tasks marked [P] can run in parallel with others in their phase
+
+**Tests Included**: 16 component tests (Button, Card, Input, Toast, Modal, Badge, EmptyState, etc.)
+
+---
+
+## Success Criteria Validation
+
+Each user story maps to spec.md success criteria:
+
+- **SC-001**: Professional UI → US1, US2, US3 deliver polished interfaces
+- **SC-002**: Lighthouse 90+ performance → T070 validates
+- **SC-003**: Lighthouse 95+ accessibility → T055-T064 ensure compliance
+- **SC-004**: FCP <1.5s → T065-T069 optimize performance
+- **SC-005-SC-007**: UX improvements → US1-US3 professional designs
+- **SC-008**: <100ms interaction → T069 ensures responsive animations
+- **SC-009**: Cross-device integrity → US4 responsive design
+- **SC-010**: Zero violations → T055-T064 accessibility audits
+- **SC-011**: Consistent design → Phase 2 foundation + all components
+- **SC-012**: Quick task creation → US3 dashboard optimization
+
+All requirements from spec.md covered by task implementation.
