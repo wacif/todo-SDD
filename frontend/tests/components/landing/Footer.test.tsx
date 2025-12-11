@@ -1,7 +1,7 @@
 // frontend/tests/components/landing/Footer.test.tsx
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import Footer, { FooterComponent } from '@/src/components/landing/Footer';
+import Footer, { FooterComponent } from '@/components/landing/Footer';
 import { landingContent } from '@/lib/constants/landing-content';
 import { Footer as FooterType } from '@/lib/types/landing';
 

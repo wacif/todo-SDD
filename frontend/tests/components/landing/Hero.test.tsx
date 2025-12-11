@@ -1,7 +1,7 @@
 // frontend/tests/components/landing/Hero.test.tsx
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import { HeroComponent } from '@/src/components/landing/Hero';
+import { HeroComponent } from '@/components/landing/Hero';
 import { HeroContent } from '@/lib/types/landing';
 
 // Mock Next.js components

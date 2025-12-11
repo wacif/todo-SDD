@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { landingContent } from '@/lib/constants/landing-content';
 
-import FeatureCard from '@/src/components/landing/FeatureCard';
-import FeaturesSection from '@/src/components/landing/FeaturesSection';
-import HowItWorks from '@/src/components/landing/HowItWorks';
+import FeatureCard from '@/components/landing/FeatureCard';
+import FeaturesSection from '@/components/landing/FeaturesSection';
+import HowItWorks from '@/components/landing/HowItWorks';
 import { Feature } from '@/lib/types/landing';
 
 // Mock Heroicons to prevent dependency issues in test environment
