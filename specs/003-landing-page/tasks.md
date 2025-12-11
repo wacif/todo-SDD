@@ -180,27 +180,27 @@
 
 ### Performance Optimization
 
-- [ ] T065 [P] Implement lazy loading for heavy components using next/dynamic
-- [ ] T066 [P] Optimize images with Next.js Image component
-- [ ] T067 [P] Add loading skeletons in frontend/src/components/ui/skeleton.tsx
-- [ ] T068 Minimize layout shifts by defining image dimensions
-- [ ] T069 Respect prefers-reduced-motion in animations
+- [X] T065 [P] Implement lazy loading for heavy components using next/dynamic
+- [X] T066 [P] Optimize images with Next.js Image component
+- [X] T067 [P] Add loading skeletons in frontend/src/components/ui/skeleton.tsx
+- [X] T068 Minimize layout shifts by defining image dimensions
+- [X] T069 Respect prefers-reduced-motion in animations
 
 ### Final Quality Checks
 
-- [ ] T070 Run Lighthouse audit on all pages (target: 90+ performance & accessibility)
-- [ ] T071 Test with slow 3G throttling
-- [ ] T072 Verify all 23+ existing tests still pass
-- [ ] T073 Add new component tests (target: 30+ total tests)
-- [ ] T074 Test edge cases (long task titles, empty states, errors)
-- [ ] T075 Verify build succeeds: `npm run build`
-- [ ] T076 Test production bundle: `npm run start`
+- [X] T070 Run Lighthouse audit on all pages (target: 90+ performance & accessibility)
+- [X] T071 Test with slow 3G throttling
+- [X] T072 Verify all 23+ existing tests still pass
+- [X] T073 Add new component tests (target: 30+ total tests)
+- [X] T074 Test edge cases (long task titles, empty states, errors)
+- [X] T075 Verify build succeeds: `npm run build`
+- [X] T076 Test production bundle: `npm run start`
 
 ### Documentation
 
-- [ ] T077 [P] Document component usage in frontend/src/components/ui/README.md
-- [ ] T078 [P] Add JSDoc comments to all component props
-- [ ] T079 Update CLAUDE.md with design system patterns
+- [X] T077 [P] Document component usage in frontend/src/components/ui/README.md
+- [X] T078 [P] Add JSDoc comments to all component props
+- [X] T079 Update CLAUDE.md with design system patterns
 
 **Checkpoint**: All quality gates passed, ready for production
 
