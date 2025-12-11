@@ -159,16 +159,16 @@
 
 ### Accessibility Audit & Fixes
 
-- [ ] T055 [P] [US5] Run axe accessibility audit on landing page
-- [ ] T056 [P] [US5] Run axe accessibility audit on auth pages
-- [ ] T057 [P] [US5] Run axe accessibility audit on dashboard
-- [ ] T058 [US5] Fix any critical violations found in audits
-- [ ] T059 [US5] Add skip-to-content link in frontend/app/layout.tsx
-- [ ] T060 [US5] Verify keyboard navigation flow on all pages
-- [ ] T061 [US5] Test focus visible states on all interactive elements
-- [ ] T062 [US5] Verify ARIA labels and descriptions
-- [ ] T063 [US5] Test with screen reader (NVDA or VoiceOver)
-- [ ] T064 [US5] Verify color contrast ratios (WCAG AA 4.5:1)
+- [X] T055 [P] [US5] Run axe accessibility audit on landing page
+- [X] T056 [P] [US5] Run axe accessibility audit on auth pages
+- [X] T057 [P] [US5] Run axe accessibility audit on dashboard
+- [X] T058 [US5] Fix any critical violations found in audits
+- [X] T059 [US5] Add skip-to-content link in frontend/app/layout.tsx
+- [X] T060 [US5] Verify keyboard navigation flow on all pages
+- [X] T061 [US5] Test focus visible states on all interactive elements
+- [X] T062 [US5] Verify ARIA labels and descriptions
+- [X] T063 [US5] Test with screen reader (NVDA or VoiceOver)
+- [X] T064 [US5] Verify color contrast ratios (WCAG AA 4.5:1)
 
 **Checkpoint**: Application is fully accessible with zero critical violations
 
