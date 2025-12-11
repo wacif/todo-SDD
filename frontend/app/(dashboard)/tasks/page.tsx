@@ -2,19 +2,35 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import TaskList, { Task } from '@/components/tasks/TaskList'
-import { toggleComplete } from '@/lib/api'
+import { Navigation } from '@/components/dashboard/Navigation'
+import { TaskList } from '@/components/dashboard/TaskList'
+import { TaskForm } from '@/components/dashboard/TaskForm'
+import { Modal } from '@/components/ui/modal'
+import { Button } from '@/components/ui/button'
+import { ToastProvider, useToast } from '@/components/ui/toast'
+import { Plus } from 'lucide-react'
 
-export default function TasksPage() {
+interface Task {
+  id: string
+  title: string
+  description: string | null
+  completed: boolean
+  created_at: string
+  updated_at: string
+}
+
+function TasksContent() {
   const router = useRouter()
+  const { toast } = useToast()
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
   const [userName, setUserName] = useState('')
+  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
 
   useEffect(() => {
-    // Check authentication
     const token = localStorage.getItem('auth_token')
     const userId = localStorage.getItem('user_id')
     const name = localStorage.getItem('user_name')
@@ -40,7 +56,6 @@ export default function TasksPage() {
       )
 
       if (response.status === 401) {
-        // Token expired or invalid
         localStorage.clear()
         router.push('/login')
         return
@@ -53,111 +68,285 @@ export default function TasksPage() {
       const data = await response.json()
       setTasks(data.tasks || [])
     } catch (err) {
-      setError('Failed to load tasks. Please try again.')
+      toast({
+        title: 'Error',
+        description: 'Failed to load tasks. Please try again.',
+        variant: 'destructive',
+      })
       console.error('Error loading tasks:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleToggle = async (taskId: number) => {
+  const handleToggleComplete = async (taskId: string) => {
     const userId = localStorage.getItem('user_id')
-    if (!userId) return
+    const token = localStorage.getItem('auth_token')
+    if (!userId || !token) return
 
-    // Optimistic update: immediately update UI
+    const task = tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    // Optimistic update
     setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
+      prevTasks.map((t) =>
+        t.id === taskId ? { ...t, completed: !t.completed } : t
       )
     )
 
     try {
-      // Update backend
-      await toggleComplete(userId, taskId)
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks/${taskId}/complete`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+
+      if (!response.ok) throw new Error('Failed to update task')
+
+      toast({
+        title: 'Success',
+        description: `Task marked as ${!task.completed ? 'complete' : 'incomplete'}`,
+        variant: 'success',
+      })
     } catch (err) {
       // Revert on error
       setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === taskId ? { ...task, completed: !task.completed } : task
+        prevTasks.map((t) =>
+          t.id === taskId ? { ...t, completed: !t.completed } : t
         )
       )
-      setError('Failed to update task. Please try again.')
-      console.error('Error toggling task:', err)
-      
-      // Clear error after 3 seconds
-      setTimeout(() => setError(''), 3000)
+      toast({
+        title: 'Error',
+        description: 'Failed to update task',
+        variant: 'destructive',
+      })
     }
   }
 
-  const handleLogout = () => {
-    localStorage.clear()
-    router.push('/login')
+  const handleCreateTask = async (data: { title: string; description: string }) => {
+    const userId = localStorage.getItem('user_id')
+    const token = localStorage.getItem('auth_token')
+    if (!userId || !token) return
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      )
+
+      if (!response.ok) throw new Error('Failed to create task')
+
+      const newTask = await response.json()
+      setTasks((prev) => [newTask, ...prev])
+      setIsCreateModalOpen(false)
+      
+      toast({
+        title: 'Success',
+        description: 'Task created successfully',
+        variant: 'success',
+      })
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create task',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleEditTask = async (data: { title: string; description: string }) => {
+    if (!editingTask) return
+
+    const userId = localStorage.getItem('user_id')
+    const token = localStorage.getItem('auth_token')
+    if (!userId || !token) return
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks/${editingTask.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      )
+
+      if (!response.ok) throw new Error('Failed to update task')
+
+      const updatedTask = await response.json()
+      setTasks((prev) =>
+        prev.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+      )
+      setIsEditModalOpen(false)
+      setEditingTask(null)
+      
+      toast({
+        title: 'Success',
+        description: 'Task updated successfully',
+        variant: 'success',
+      })
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update task',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleDeleteTask = async (taskId: string) => {
+    const userId = localStorage.getItem('user_id')
+    const token = localStorage.getItem('auth_token')
+    if (!userId || !token) return
+
+    if (!confirm('Are you sure you want to delete this task?')) return
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks/${taskId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (!response.ok) throw new Error('Failed to delete task')
+
+      setTasks((prev) => prev.filter((t) => t.id !== taskId))
+      
+      toast({
+        title: 'Success',
+        description: 'Task deleted successfully',
+        variant: 'success',
+      })
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete task',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleEdit = (task: Task) => {
+    setEditingTask(task)
+    setIsEditModalOpen(true)
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Loading tasks...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p className="mt-2 text-muted-foreground">Loading tasks...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+    <div className="min-h-screen bg-muted">
+      <Navigation userName={userName} />
+
+      <main className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* Header with filters and actions */}
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Tasks</h1>
-            <p className="text-sm text-gray-600">Welcome back, {userName}!</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">My Tasks</h1>
+            <div className="flex gap-2">
+              <Button
+                variant={filter === 'all' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setFilter('all')}
+              >
+                All
+              </Button>
+              <Button
+                variant={filter === 'pending' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setFilter('pending')}
+              >
+                Pending
+              </Button>
+              <Button
+                variant={filter === 'completed' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setFilter('completed')}
+              >
+                Completed
+              </Button>
+            </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-4">
-            <div className="text-sm text-red-800">{error}</div>
-          </div>
-        )}
-
-        {/* Add Task Button */}
-        <div className="mb-6">
-          <Link
-            href="/tasks/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg
-              className="h-5 w-5 mr-2"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Add New Task
-          </Link>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="h-5 w-5 mr-2" />
+            Add Task
+          </Button>
         </div>
 
-        {/* Tasks List */}
-        <TaskList tasks={tasks} onToggleComplete={handleToggle} />
+        {/* Task List */}
+        <TaskList
+          tasks={tasks}
+          filter={filter}
+          onToggleComplete={handleToggleComplete}
+          onEdit={handleEdit}
+          onDelete={handleDeleteTask}
+        />
       </main>
+
+      {/* Create Task Modal */}
+      <Modal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
+        <Modal.Content>
+          <Modal.Header>Create New Task</Modal.Header>
+          <Modal.Body>
+            <TaskForm
+              onSubmit={handleCreateTask}
+              onCancel={() => setIsCreateModalOpen(false)}
+            />
+          </Modal.Body>
+        </Modal.Content>
+      </Modal>
+
+      {/* Edit Task Modal */}
+      <Modal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
+        <Modal.Content>
+          <Modal.Header>Edit Task</Modal.Header>
+          <Modal.Body>
+            <TaskForm
+              initialTask={editingTask || undefined}
+              onSubmit={handleEditTask}
+              onCancel={() => {
+                setIsEditModalOpen(false)
+                setEditingTask(null)
+              }}
+            />
+          </Modal.Body>
+        </Modal.Content>
+      </Modal>
     </div>
+  )
+}
+
+export default function TasksPage() {
+  return (
+    <ToastProvider>
+      <TasksContent />
+    </ToastProvider>
   )
 }
