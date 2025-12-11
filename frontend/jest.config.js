@@ -15,6 +15,9 @@ const config = {
   // Module file extensions for tests
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 
+  // Setup files after environment
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+
   // Transforms applied to code before testing
   transform: {
     // Use babel-jest for TypeScript/JavaScript files, relying on Next.js Babel presets
@@ -23,7 +26,7 @@ const config = {
 
   // Mapping for module aliases defined in tsconfig.json and static files
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1', // Map @/ alias to src/
+    '^@/(.*)$': '<rootDir>/src/$1', // Map @/ alias to src/
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy', // Mock styles
     '\\.(gif|ttf|eot|svg|png|jpg)$': '<rootDir>/__mocks__/fileMock.js', // Mock assets
   },
