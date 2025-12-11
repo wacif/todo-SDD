@@ -1,587 +1,561 @@
-# Data Model: Landing Page Content Entities
+# Data Model: Design System Components
 
-**Feature**: Professional Landing Page & Website Design  
-**Date**: 2025-12-09  
-**Phase**: 1 - Design & Contracts
+**Feature**: Professional Frontend UI Design (Complete Application)  
+**Date**: 2025-12-11  
+**Context**: UI component definitions, not backend data models
 
-## Overview
+> **Note**: This feature is frontend-only. The "data model" describes UI component entities, their props, states, and composition patterns, not database entities.
 
-This document defines the content entities and data structures for the landing page. Since the landing page is static content (no database persistence), these entities represent TypeScript interfaces for component props and content constants.
+## Component Entities
 
-## Core Entities
+### 1. Button Component
 
-### 1. Hero Section
+**Purpose**: Primary interactive element for user actions  
+**Location**: `frontend/src/components/ui/button.tsx`
 
-**Purpose**: Above-the-fold section that captures attention and communicates value proposition.
-
-**Entity Definition**:
+**Props**:
 ```typescript
-interface HeroContent {
-  headline: string;           // Primary value proposition (5-10 words)
-  subheadline: string;        // Supporting explanation (15-25 words)
-  ctaPrimary: CallToAction;   // Main action button
-  ctaSecondary?: CallToAction; // Optional secondary action
-  heroVisual: HeroVisual;     // Hero image/illustration
-  badges?: TrustBadge[];      // Optional trust indicators
-}
-
-interface CallToAction {
-  label: string;              // Button text (2-4 words)
-  href: string;               // Destination URL
-  variant: 'primary' | 'secondary' | 'outline';
-  ariaLabel: string;          // Accessibility label
-}
-
-interface HeroVisual {
-  src: string;                // Image path
-  alt: string;                // Descriptive alt text
-  width: number;              // Image width (px)
-  height: number;             // Image height (px)
-  priority: boolean;          // Load priority (true for hero)
-}
-
-interface TrustBadge {
-  icon: string;               // Icon name or path
-  label: string;              // Badge text
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant: 'primary' | 'secondary' | 'ghost' | 'danger'
+  size: 'sm' | 'md' | 'lg'
+  isLoading?: boolean
+  disabled?: boolean
+  children: ReactNode
+  className?: string
 }
 ```
+
+**States**:
+- Default (idle)
+- Hover (mouse over)
+- Active (pressed)
+- Focus (keyboard navigation)
+- Disabled (not interactive)
+- Loading (processing action)
 
 **Validation Rules**:
-- `headline`: 5-60 characters, no punctuation at end
-- `subheadline`: 50-200 characters, complete sentence
-- `ctaPrimary.label`: 2-25 characters, action-oriented verb
-- `heroVisual.alt`: Descriptive, not "image" or "photo"
+- Must have accessible label (children or aria-label)
+- Disabled state prevents click events
+- Loading state shows spinner, blocks interaction
 
-**Example Data**:
-```typescript
-const heroContent: HeroContent = {
-  headline: "Your tasks, simplified",
-  subheadline: "Stop juggling scattered to-do lists. Organize, prioritize, and accomplish more with one powerful tool.",
-  ctaPrimary: {
-    label: "Start organizing for free",
-    href: "/signup",
-    variant: "primary",
-    ariaLabel: "Sign up for a free account",
-  },
-  ctaSecondary: {
-    label: "See how it works",
-    href: "#features",
-    variant: "outline",
-    ariaLabel: "Scroll to features section",
-  },
-  heroVisual: {
-    src: "/images/landing/hero-illustration.svg",
-    alt: "Illustration of organized task list with checkmarks",
-    width: 600,
-    height: 400,
-    priority: true,
-  },
-  badges: [
-    { icon: "CheckBadgeIcon", label: "Free to start" },
-    { icon: "ShieldCheckIcon", label: "Secure & private" },
-  ],
-};
-```
+**Relationships**:
+- Used in: Forms, modals, navigation, cards
+- Depends on: Design tokens (colors, spacing)
 
 ---
 
-### 2. Feature Card
+### 2. Input Component
 
-**Purpose**: Showcase individual product capabilities with visual icon and description.
+**Purpose**: Text input for forms with validation states  
+**Location**: `frontend/src/components/ui/input.tsx`
 
-**Entity Definition**:
+**Props**:
 ```typescript
-interface Feature {
-  id: string;                 // Unique identifier (slug)
-  icon: string;               // Heroicon name
-  title: string;              // Feature name (2-6 words)
-  description: string;        // Feature explanation (10-30 words)
-  benefit?: string;           // Optional outcome statement
-  expandable?: boolean;       // Can expand for more details
-  detailContent?: FeatureDetail; // Extended content (if expandable)
-}
-
-interface FeatureDetail {
-  longDescription: string;    // Detailed explanation (50-150 words)
-  screenshot?: {
-    src: string;
-    alt: string;
-    width: number;
-    height: number;
-  };
-  benefits: string[];         // List of specific benefits
-}
-
-interface FeaturesSection {
-  sectionTitle: string;       // Section heading
-  sectionDescription?: string; // Optional section intro
-  features: Feature[];        // Array of 3-5 features
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string
+  error?: string
+  helperText?: string
+  state?: 'default' | 'error' | 'success'
+  type?: 'text' | 'email' | 'password' | 'tel' | 'url'
+  required?: boolean
+  disabled?: boolean
+  className?: string
 }
 ```
+
+**States**:
+- Default (idle)
+- Focus (active editing)
+- Filled (has value)
+- Error (validation failed)
+- Success (validation passed)
+- Disabled (read-only)
 
 **Validation Rules**:
-- `id`: Lowercase, hyphen-separated (e.g., "smart-reminders")
-- `title`: 2-40 characters, title case
-- `description`: 50-200 characters, complete sentence
-- `features.length`: 3-5 features (optimal for landing page)
+- Email type validates email format
+- Required prop enforces non-empty value
+- Error message must have associated id for aria-describedby
+- Label must be provided or aria-label required
 
-**Example Data**:
-```typescript
-const featuresSection: FeaturesSection = {
-  sectionTitle: "Everything you need to stay organized",
-  sectionDescription: "Simple yet powerful features that help you manage tasks efficiently.",
-  features: [
-    {
-      id: "smart-reminders",
-      icon: "BellAlertIcon",
-      title: "Never miss a deadline",
-      description: "Smart reminders and due date tracking keep you on schedule automatically.",
-      benefit: "Reduce stress and improve reliability",
-    },
-    {
-      id: "priority-system",
-      icon: "StarIcon",
-      title: "Focus on what matters",
-      description: "Priority levels and filters help you focus on high-impact work first.",
-      benefit: "Increase productivity by 40%",
-    },
-    {
-      id: "quick-capture",
-      icon: "BoltIcon",
-      title: "Capture tasks instantly",
-      description: "Add tasks in seconds from any device. No complicated forms or menus.",
-      benefit: "Save 10 minutes per day",
-    },
-  ],
-};
-```
+**Relationships**:
+- Used in: Forms (auth, task creation/editing)
+- Composed with: Label, ErrorMessage, HelperText
+- Depends on: Design tokens, validation utilities
 
 ---
 
-### 3. Testimonial
+### 3. Card Component
 
-**Purpose**: Provide social proof through user quotes and credibility indicators.
+**Purpose**: Container for grouped content with consistent styling  
+**Location**: `frontend/src/components/ui/card.tsx`
 
-**Entity Definition**:
+**Props**:
 ```typescript
-interface Testimonial {
-  id: string;                 // Unique identifier
-  quote: string;              // User testimonial (20-100 words)
-  author: {
-    name: string;             // Full name
-    role: string;             // Job title or description
-    company?: string;         // Optional company name
-    avatar?: string;          // Optional profile photo path
-  };
-  rating?: number;            // Optional star rating (1-5)
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode
+  className?: string
 }
 
-interface SocialProofSection {
-  sectionTitle: string;       // Section heading
-  testimonials: Testimonial[]; // Array of 2-4 testimonials
-  statistics: Statistic[];    // Usage metrics
+interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode
+  className?: string
+}
+
+interface CardContentProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode
+  className?: string
+}
+
+interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode
+  className?: string
 }
 ```
+
+**States**:
+- Default (static)
+- Hover (optional interactive variant)
+- Selected (optional active state)
 
 **Validation Rules**:
-- `quote`: 100-500 characters, authentic voice
-- `author.name`: Full name (first + last)
-- `author.role`: Professional title, not generic
-- `rating`: Integer 1-5 if present
+- Should contain semantic content (not just div)
+- Header should use appropriate heading level
 
-**Example Data**:
-```typescript
-const socialProofSection: SocialProofSection = {
-  sectionTitle: "Trusted by thousands of productive people",
-  testimonials: [
-    {
-      id: "testimonial-sarah",
-      quote: "This app helped me reclaim 5 hours a week. I finally feel in control of my workload instead of drowning in it.",
-      author: {
-        name: "Sarah Johnson",
-        role: "Product Manager",
-        company: "TechCorp",
-        avatar: "/images/landing/testimonials/sarah.jpg",
-      },
-      rating: 5,
-    },
-    {
-      id: "testimonial-michael",
-      quote: "The priority system changed everything. I used to waste time on low-impact tasks. Now I always know what to do next.",
-      author: {
-        name: "Michael Chen",
-        role: "Freelance Designer",
-      },
-      rating: 5,
-    },
-  ],
-  statistics: [
-    { number: "10,000+", label: "Tasks completed daily", icon: "CheckCircleIcon" },
-    { number: "5,000+", label: "Active users", icon: "UsersIcon" },
-    { number: "4.9/5", label: "Average rating", icon: "StarIcon" },
-  ],
-};
-```
+**Relationships**:
+- Used in: Dashboard (task cards), landing page (feature cards)
+- Composed of: Card, CardHeader, CardContent, CardFooter
+- Contains: Any content (buttons, text, images)
 
 ---
 
-### 4. Statistic
+### 4. Modal/Dialog Component
 
-**Purpose**: Display quantifiable social proof and usage metrics.
+**Purpose**: Overlay for focused interactions requiring user attention  
+**Location**: `frontend/src/components/ui/modal.tsx`
 
-**Entity Definition**:
+**Props**:
 ```typescript
-interface Statistic {
-  number: string;             // Formatted number (e.g., "10,000+", "99%")
-  label: string;              // Metric description (2-6 words)
-  icon?: string;              // Optional icon name
-  trend?: 'up' | 'down' | 'neutral'; // Optional trend indicator
+interface ModalProps {
+  isOpen: boolean
+  onClose: () => void
+  title?: string
+  description?: string
+  children: ReactNode
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  closeOnOverlayClick?: boolean
+  showCloseButton?: boolean
+  className?: string
 }
 ```
 
-**Validation Rules**:
-- `number`: Formatted with commas/+/% for readability
-- `label`: Concise, avoid jargon
-- Numbers should be credible (not exaggerated)
+**States**:
+- Closed (not rendered)
+- Opening (animation in)
+- Open (visible, interactive)
+- Closing (animation out)
 
-**Example Data**:
-```typescript
-const statistics: Statistic[] = [
-  {
-    number: "10,000+",
-    label: "Tasks completed daily",
-    icon: "CheckCircleIcon",
-    trend: "up",
-  },
-  {
-    number: "5,000+",
-    label: "Active users",
-    icon: "UsersIcon",
-    trend: "up",
-  },
-  {
-    number: "4.9/5",
-    label: "Average rating",
-    icon: "StarIcon",
-  },
-];
-```
+**Validation Rules**:
+- Must trap focus within modal when open
+- Must return focus to trigger element on close
+- Must have accessible title (title prop or aria-label)
+- ESC key must close modal
+- Overlay click should close (if enabled)
+
+**Relationships**:
+- Used in: Task creation, confirmations, auth flows
+- Contains: Form elements, buttons, content
+- Depends on: Focus trap utility, portal rendering
 
 ---
 
-### 5. How It Works Step
+### 5. Toast/Notification Component
 
-**Purpose**: Explain user workflow in simple, sequential steps.
+**Purpose**: Temporary feedback messages for user actions  
+**Location**: `frontend/src/components/ui/toast.tsx`
 
-**Entity Definition**:
+**Props**:
 ```typescript
-interface WorkflowStep {
-  stepNumber: number;         // Sequential order (1-based)
-  title: string;              // Step name (2-5 words)
-  description: string;        // Step explanation (15-40 words)
-  icon: string;               // Visual icon for step
-}
-
-interface HowItWorksSection {
-  sectionTitle: string;       // Section heading
-  sectionDescription?: string; // Optional intro
-  steps: WorkflowStep[];      // Array of 3-5 steps
+interface ToastProps {
+  id: string
+  type: 'success' | 'error' | 'warning' | 'info'
+  title?: string
+  message: string
+  duration?: number  // milliseconds, 0 = permanent
+  onClose?: () => void
+  action?: {
+    label: string
+    onClick: () => void
+  }
 }
 ```
+
+**States**:
+- Entering (animation in)
+- Visible (displayed)
+- Exiting (animation out)
+- Dismissed (removed)
 
 **Validation Rules**:
-- `stepNumber`: Sequential integers starting at 1
-- `title`: Action-oriented (verb + object)
-- `steps.length`: 3-5 steps (optimal for comprehension)
+- Must have accessible message (aria-live="polite" for info, "assertive" for errors)
+- Auto-dismiss after duration (except errors may persist)
+- Must be dismissible by user
 
-**Example Data**:
-```typescript
-const howItWorksSection: HowItWorksSection = {
-  sectionTitle: "Get organized in minutes",
-  sectionDescription: "Simple workflow that fits into your existing routine.",
-  steps: [
-    {
-      stepNumber: 1,
-      title: "Create your account",
-      description: "Sign up with email in 30 seconds. No credit card required.",
-      icon: "UserPlusIcon",
-    },
-    {
-      stepNumber: 2,
-      title: "Add your tasks",
-      description: "Quickly capture tasks with due dates, priorities, and categories.",
-      icon: "PlusCircleIcon",
-    },
-    {
-      stepNumber: 3,
-      title: "Stay on track",
-      description: "Get reminders, mark tasks complete, and watch your productivity soar.",
-      icon: "CheckBadgeIcon",
-    },
-  ],
-};
-```
+**State Transitions**:
+1. Created → Entering (0ms)
+2. Entering → Visible (300ms animation)
+3. Visible → Exiting (after duration or user dismiss)
+4. Exiting → Dismissed (300ms animation)
+
+**Relationships**:
+- Used globally via ToastProvider context
+- Triggered by: Form submissions, API responses, user actions
 
 ---
 
-### 6. Navigation Menu
+### 6. Navigation Component
 
-**Purpose**: Provide site navigation and prominent CTAs.
+**Purpose**: Primary site navigation with responsive behavior  
+**Location**: `frontend/src/components/ui/navigation.tsx`
 
-**Entity Definition**:
+**Props**:
 ```typescript
-interface NavigationItem {
-  label: string;              // Link text
-  href: string;               // Destination URL
-  external?: boolean;         // Opens in new tab
-  ariaLabel?: string;         // Accessibility label
-}
-
-interface Navigation {
-  logo: {
-    src: string;              // Logo image path
-    alt: string;              // Alt text
-    href: string;             // Home link
-  };
-  links: NavigationItem[];    // Navigation links
-  cta: CallToAction;          // Primary CTA button
-  authLinks: {                // Auth-specific links
-    login: NavigationItem;
-    signup: NavigationItem;
-    dashboard: NavigationItem; // For logged-in users
-  };
-}
-```
-
-**Validation Rules**:
-- `links.length`: 3-6 links (avoid overwhelming users)
-- `logo.alt`: Brand name, not "logo"
-- CTAs distinct from regular links (button styling)
-
-**Example Data**:
-```typescript
-const navigation: Navigation = {
-  logo: {
-    src: "/images/logo.svg",
-    alt: "Todo App",
-    href: "/",
-  },
-  links: [
-    { label: "Features", href: "#features", ariaLabel: "Jump to features section" },
-    { label: "How it works", href: "#how-it-works", ariaLabel: "Jump to how it works section" },
-    { label: "Testimonials", href: "#testimonials", ariaLabel: "Jump to testimonials section" },
-  ],
-  cta: {
-    label: "Start for free",
-    href: "/signup",
-    variant: "primary",
-    ariaLabel: "Sign up for free account",
-  },
-  authLinks: {
-    login: {
-      label: "Login",
-      href: "/login",
-      ariaLabel: "Log in to your account",
-    },
-    signup: {
-      label: "Sign up",
-      href: "/signup",
-      ariaLabel: "Create a free account",
-    },
-    dashboard: {
-      label: "Go to Dashboard",
-      href: "/tasks",
-      ariaLabel: "Go to your task dashboard",
-    },
-  },
-};
-```
-
----
-
-### 7. Footer
-
-**Purpose**: Provide legal, contact, and supplementary information.
-
-**Entity Definition**:
-```typescript
-interface FooterLink {
-  label: string;
-  href: string;
-  external?: boolean;
-}
-
-interface FooterSection {
-  title: string;              // Section heading
-  links: FooterLink[];        // Links in section
-}
-
-interface Footer {
-  sections: FooterSection[];  // Grouped footer links
-  copyright: string;          // Copyright text
-  socialLinks?: SocialLink[]; // Optional social media
-}
-
-interface SocialLink {
-  platform: 'twitter' | 'github' | 'linkedin' | 'youtube';
-  url: string;
-  ariaLabel: string;
-}
-```
-
-**Validation Rules**:
-- `sections.length`: 2-4 sections (Legal, Company, Resources, etc.)
-- Links must include privacy policy and terms of service
-- `copyright`: Current year + company name
-
-**Example Data**:
-```typescript
-const footer: Footer = {
-  sections: [
-    {
-      title: "Legal",
-      links: [
-        { label: "Privacy Policy", href: "/privacy" },
-        { label: "Terms of Service", href: "/terms" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { label: "About", href: "/about" },
-        { label: "Contact", href: "/contact" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { label: "Help Center", href: "/help" },
-        { label: "Blog", href: "/blog" },
-      ],
-    },
-  ],
-  copyright: `© ${new Date().getFullYear()} Todo App. All rights reserved.`,
-  socialLinks: [
-    {
-      platform: "twitter",
-      url: "https://twitter.com/todoapp",
-      ariaLabel: "Follow us on Twitter",
-    },
-    {
-      platform: "github",
-      url: "https://github.com/todoapp",
-      ariaLabel: "View our GitHub repository",
-    },
-  ],
-};
-```
-
----
-
-## State Management
-
-Since the landing page is static content, state management is minimal:
-
-### Client-Side State
-
-```typescript
-// Auth state (client-side detection)
-interface AuthState {
-  isAuthenticated: boolean;   // User logged in
+interface NavigationProps {
+  items: NavigationItem[]
+  logo?: ReactNode
   user?: {
-    id: string;
-    name: string;
-  };
+    name: string
+    email: string
+    avatar?: string
+  }
+  onLogout?: () => void
+  className?: string
 }
 
-// UI state (expandable features, mobile menu)
-interface UIState {
-  mobileMenuOpen: boolean;    // Mobile nav toggle
-  expandedFeatureId?: string; // Currently expanded feature card
+interface NavigationItem {
+  label: string
+  href: string
+  icon?: ReactNode
+  isActive?: boolean
+  badge?: string | number
 }
 ```
 
-### State Transitions
+**States**:
+- Desktop (full horizontal menu)
+- Mobile (hamburger menu collapsed)
+- Mobile Open (menu expanded)
 
-**Authentication Detection**:
-```
-Anonymous → Authenticated (on page load, check auth cookie)
-```
+**Validation Rules**:
+- Active item must be visually distinct
+- Mobile menu must be keyboard accessible
+- Must have skip-to-content link for accessibility
 
-**Mobile Menu**:
-```
-Closed → Open (user clicks hamburger icon)
-Open → Closed (user clicks close button or selects link)
-```
-
-**Feature Expansion** (if implemented):
-```
-Collapsed → Expanded (user clicks "Learn more")
-Expanded → Collapsed (user clicks "Show less" or another card)
-```
+**Relationships**:
+- Used in: Root layout (all pages)
+- Contains: Logo, nav items, user menu
+- Depends on: Button, Dropdown components
 
 ---
 
-## Content Storage
+### 7. Loading/Skeleton Component
 
-**Location**: `/frontend/lib/constants/landing-content.ts`
+**Purpose**: Placeholder for content being loaded  
+**Location**: `frontend/src/components/ui/skeleton.tsx`
 
-All content entities will be exported as constants:
+**Props**:
+```typescript
+interface SkeletonProps {
+  variant?: 'text' | 'circular' | 'rectangular'
+  width?: string | number
+  height?: string | number
+  count?: number
+  className?: string
+}
+```
+
+**States**:
+- Animating (pulsing/shimmer effect)
+
+**Validation Rules**:
+- Must use aria-label="Loading" or aria-busy="true"
+- Should match approximate size of final content
+
+**Relationships**:
+- Used in: Lazy-loaded components, data fetching states
+- Replaces: Actual content during loading
+
+---
+
+### 8. EmptyState Component
+
+**Purpose**: Informational display when lists/sections have no content  
+**Location**: `frontend/src/components/ui/empty-state.tsx`
+
+**Props**:
+```typescript
+interface EmptyStateProps {
+  icon?: ReactNode
+  title: string
+  description?: string
+  action?: {
+    label: string
+    onClick: () => void
+  }
+  className?: string
+}
+```
+
+**States**:
+- Static (informational)
+
+**Validation Rules**:
+- Should provide helpful guidance for next action
+- Icon should be decorative (aria-hidden="true")
+
+**Relationships**:
+- Used in: Task list (no tasks), search results (no matches)
+- Contains: Icon, text, optional CTA button
+
+---
+
+## Design Token Entities
+
+### Color Palette
+
+**Structure**:
+```typescript
+interface ColorPalette {
+  primary: ColorScale      // Brand colors
+  neutral: ColorScale      // Grays
+  success: ColorScale      // Green
+  error: ColorScale        // Red
+  warning: ColorScale      // Yellow/Orange
+  info: ColorScale         // Blue
+}
+
+interface ColorScale {
+  50: string   // Lightest
+  100: string
+  200: string
+  300: string
+  400: string
+  500: string  // Base color
+  600: string
+  700: string
+  800: string
+  900: string  // Darkest
+}
+```
+
+**Validation Rules**:
+- All text/background combinations must meet WCAG AA contrast (4.5:1)
+- Primary color must have accessible variants for text and backgrounds
+
+---
+
+### Typography Scale
+
+**Structure**:
+```typescript
+interface TypographyScale {
+  fontFamily: {
+    sans: string[]
+    mono: string[]
+  }
+  fontSize: {
+    xs: string    // 0.75rem
+    sm: string    // 0.875rem
+    base: string  // 1rem
+    lg: string    // 1.125rem
+    xl: string    // 1.25rem
+    '2xl': string // 1.5rem
+    '3xl': string // 1.875rem
+    '4xl': string // 2.25rem
+  }
+  fontWeight: {
+    normal: number   // 400
+    medium: number   // 500
+    semibold: number // 600
+    bold: number     // 700
+  }
+  lineHeight: {
+    tight: number    // 1.25
+    normal: number   // 1.5
+    relaxed: number  // 1.75
+  }
+}
+```
+
+**Validation Rules**:
+- Base font size 16px minimum for accessibility
+- Line height 1.5+ for body text
+- Font weight 400+ for body, 600+ for headings
+
+---
+
+### Spacing Scale
+
+**Structure**:
+```typescript
+interface SpacingScale {
+  0: '0'
+  1: '0.25rem'  // 4px
+  2: '0.5rem'   // 8px (base unit)
+  3: '0.75rem'  // 12px
+  4: '1rem'     // 16px
+  6: '1.5rem'   // 24px
+  8: '2rem'     // 32px
+  12: '3rem'    // 48px
+  16: '4rem'    // 64px
+  24: '6rem'    // 96px
+}
+```
+
+**Validation Rules**:
+- Use multiples of 4px for consistency
+- Minimum touch target size 44x44px (iOS), 48x48px (Android)
+
+---
+
+## Component Composition Patterns
+
+### Form Pattern
 
 ```typescript
-// lib/constants/landing-content.ts
-export const landingContent = {
-  hero: heroContent,
-  features: featuresSection,
-  socialProof: socialProofSection,
-  howItWorks: howItWorksSection,
-  navigation,
-  footer,
-};
+<form onSubmit={handleSubmit}>
+  <Input
+    label="Email"
+    type="email"
+    error={errors.email}
+    required
+  />
+  <Input
+    label="Password"
+    type="password"
+    error={errors.password}
+    required
+  />
+  <Button type="submit" isLoading={isSubmitting}>
+    Sign In
+  </Button>
+</form>
 ```
 
-**Rationale**: Centralized content makes updates easy and enables future CMS integration if needed.
-
----
-
-## Type Exports
-
-All interfaces will be exported from a types file for reuse across components:
+### Modal with Form Pattern
 
 ```typescript
-// lib/types/landing.ts
-export type {
-  HeroContent,
-  CallToAction,
-  HeroVisual,
-  TrustBadge,
-  Feature,
-  FeatureDetail,
-  FeaturesSection,
-  Testimonial,
-  SocialProofSection,
-  Statistic,
-  WorkflowStep,
-  HowItWorksSection,
-  NavigationItem,
-  Navigation,
-  FooterLink,
-  FooterSection,
-  Footer,
-  SocialLink,
-  AuthState,
-  UIState,
-};
+<Modal isOpen={isOpen} onClose={onClose} title="Create Task">
+  <form onSubmit={handleCreateTask}>
+    <Input label="Task Title" required />
+    <Input label="Description" />
+    <Button type="submit">Create</Button>
+    <Button variant="ghost" onClick={onClose}>Cancel</Button>
+  </form>
+</Modal>
+```
+
+### Task Card Pattern
+
+```typescript
+<Card>
+  <CardHeader>
+    <h3>{task.title}</h3>
+    <Badge variant={task.priority}>{task.priority}</Badge>
+  </CardHeader>
+  <CardContent>
+    <p>{task.description}</p>
+  </CardContent>
+  <CardFooter>
+    <Button size="sm" onClick={onEdit}>Edit</Button>
+    <Button size="sm" variant="ghost" onClick={onDelete}>Delete</Button>
+  </CardFooter>
+</Card>
 ```
 
 ---
 
-## Summary
+## Testing Requirements
 
-**Entities Defined**: 7 core entities (Hero, Feature, Testimonial, Statistic, WorkflowStep, Navigation, Footer)  
-**Data Location**: `/frontend/lib/constants/landing-content.ts`  
-**Type Definitions**: `/frontend/lib/types/landing.ts`  
-**Validation**: TypeScript interfaces + runtime validation for user input (if CMS added later)  
-**State Management**: Minimal client-side state (auth detection, mobile menu, feature expansion)
+Each component must have:
 
-This data model supports all 15 functional requirements from the specification and enables test-driven development with clear contracts.
+1. **Unit Tests**:
+   - Render without errors
+   - Accept all documented props
+   - Handle state transitions correctly
+   - Emit events properly
+
+2. **Accessibility Tests**:
+   - Pass axe-core automated checks
+   - Have proper ARIA attributes
+   - Support keyboard navigation
+   - Meet focus management requirements
+
+3. **Visual Regression Tests** (optional):
+   - Snapshot tests for visual consistency
+   - Test all variants and states
+
+4. **Integration Tests**:
+   - Work correctly when composed
+   - Form submission flows
+   - Modal open/close cycles
+
+---
+
+## Migration Strategy
+
+### Existing Components
+
+**Landing Page Components** (keep as-is, apply tokens):
+- `Hero.tsx` → Update colors, spacing to use design tokens
+- `Features.tsx` → Wrap FeatureCard with new Card component
+- `SocialProof.tsx` → Update styling consistency
+- `Footer.tsx` → Apply navigation patterns
+
+**Dashboard Components** (enhance):
+- Task list → Use new Card component
+- Forms → Replace with new Input/Button components
+- Modals → Replace with new Modal component
+
+**Authentication Components** (rebuild):
+- Sign in form → Use new form components
+- Sign up form → Use new form components
+- Error states → Use new Toast component
+
+---
+
+## Implementation Order
+
+1. **Foundation** (Phase 1):
+   - Design tokens (colors, typography, spacing)
+   - Tailwind config extension
+   - CSS custom properties
+
+2. **Core Components** (Phase 2):
+   - Button
+   - Input
+   - Card
+
+3. **Layout Components** (Phase 3):
+   - Navigation
+   - Modal
+   - Toast
+
+4. **Specialized Components** (Phase 4):
+   - Skeleton
+   - EmptyState
+   - Badge, Tooltip, Dropdown (as needed)
+
+5. **Page Implementation** (Phase 5):
+   - Apply to auth pages
+   - Apply to dashboard
+   - Enhance landing page
+
+---
+
+## Documentation Requirements
+
+Each component must include:
+- TypeScript interface with JSDoc comments
+- Usage examples in Storybook or component file
+- Accessibility notes (ARIA, keyboard support)
+- Visual states documentation (screenshots or Figma)

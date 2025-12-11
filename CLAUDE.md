@@ -71,6 +71,8 @@ For detailed patterns, see `frontend/CLAUDE.md` and `backend/CLAUDE.md`
 - Neon Serverless PostgreSQL 15+ (cloud-hosted, connection pooling included) (002-phase-web-app)
 - TypeScript 5.3+, React 19, Next.js 16 (App Router with Turbopack) + Next.js, React, Tailwind CSS, Zod (validation), better-auth (auth state detection) (003-landing-page)
 - N/A (static landing page, no server-side data storage) (003-landing-page)
+- TypeScript 5.3+ (frontend), Python 3.13+ (backend - no changes) + Next.js 16.0, React 19.0, Tailwind CSS 3.4, Framer Motion 12.23, Lucide React (003-landing-page)
+- N/A (frontend-only changes, existing PostgreSQL backend unchanged) (003-landing-page)
 
 ## Recent Changes
 - 002-phase-web-app: Added Neon Serverless PostgreSQL 15+ (cloud-hosted, connection pooling included)
