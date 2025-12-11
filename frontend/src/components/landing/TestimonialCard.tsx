@@ -1,7 +1,7 @@
 // frontend/src/components/landing/TestimonialCard.tsx
 import React from 'react';
 import Image from 'next/image';
-import { Testimonial } from '../../lib/types/landing';
+import { Testimonial } from '@/lib/types/landing';
 import { Star } from 'lucide-react'; // Assuming Lucide is available
 
 interface TestimonialCardProps {

@@ -13,6 +13,13 @@ jest.mock('next/image', () => {
     };
 });
 
+// Mock Framer Motion
+jest.mock('framer-motion', () => ({
+    motion: {
+        div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    },
+}));
+
 // Mock Lucide icons
 jest.mock('lucide-react', () => ({
     Star: ({ className }: { className: string }) => <svg data-testid={`StarIcon-${className}`} />,

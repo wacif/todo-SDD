@@ -62,7 +62,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: [0.42, 0, 0.58, 1] as any, // easeOut bezier curve
     },
   },
 };
@@ -142,5 +142,3 @@ export const HeroComponent: React.FC<HeroProps> = ({ heroContent }) => {
 
 const LandingHero = () => <HeroComponent heroContent={landingContent.hero} />;
 export default LandingHero;
-
-export { HeroComponent };

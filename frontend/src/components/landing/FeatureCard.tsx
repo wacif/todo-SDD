@@ -1,5 +1,5 @@
 // frontend/src/components/landing/FeatureCard.tsx
-import { Feature } from '@/frontend/lib/types/landing';
+import { Feature } from '@/lib/types/landing';
 import { SparklesIcon, BoltIcon, UsersIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 // Placeholder component for dynamic icon rendering

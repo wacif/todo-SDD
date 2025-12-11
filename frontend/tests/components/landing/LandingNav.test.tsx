@@ -22,19 +22,14 @@ jest.mock('next/image', () => {
   };
 });
 
-// Mock the useAuth hook (will be replaced in T015)
-let mockIsAuthenticated = false;
-jest.mock('../../../src/components/landing/LandingNav', () => {
-  const originalModule = jest.requireActual('../../../src/components/landing/LandingNav');
-  return {
-    ...originalModule,
-    useAuth: () => ({
-      isAuthenticated: mockIsAuthenticated,
-      user: mockIsAuthenticated ? { id: '1', name: 'Test User' } : undefined,
-    }),
-    LandingNavComponent: originalModule.LandingNavComponent,
-  };
-});
+// Mock localStorage for authentication state
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 const mockNavigationContent: Navigation = {
   logo: {
@@ -76,11 +71,12 @@ window.document.getElementById = mockGetElementById;
 describe('LandingNav Component (T008)', () => {
   beforeEach(() => {
     // Reset mock auth state for each test
-    mockIsAuthenticated = false;
+    localStorageMock.getItem.mockReturnValue(null);
     jest.clearAllMocks();
   });
 
   test('renders logo and navigation links for anonymous user (T008)', () => {
+    localStorageMock.getItem.mockReturnValue(null); // Not authenticated
     render(<LandingNavComponent navigationContent={mockNavigationContent} />);
 
     // Check logo
@@ -92,18 +88,18 @@ describe('LandingNav Component (T008)', () => {
     expect(screen.getByRole('link', { name: /pricing/i })).toBeInTheDocument();
 
     // Check desktop CTAs (Anonymous)
-    expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Sign up for a free account' })).toHaveTextContent('Sign up'); // Primary CTA defaults to signup label
-    expect(screen.queryByRole('link', { name: 'Go to Dashboard' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Log in to your account' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Create a free account' })).toHaveTextContent('Sign up'); // Primary CTA defaults to signup label
+    expect(screen.queryByRole('link', { name: 'Go to your task dashboard' })).not.toBeInTheDocument();
   });
 
   test('renders correct CTAs for authenticated user (T008, T015 - partial)', () => {
-    mockIsAuthenticated = true;
+    localStorageMock.getItem.mockReturnValue('true'); // Authenticated
     render(<LandingNavComponent navigationContent={mockNavigationContent} />);
 
     // Check desktop CTAs (Authenticated)
-    expect(screen.queryByRole('link', { name: /login/i })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /go to dashboard/i })).toHaveAttribute('href', '/tasks');
+    expect(screen.queryByRole('link', { name: 'Log in to your account' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Go to your task dashboard' })).toHaveAttribute('href', '/tasks');
   });
 
   test('toggles mobile menu on button click (T008)', () => {

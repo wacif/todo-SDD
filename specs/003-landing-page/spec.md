@@ -110,7 +110,7 @@ A design-conscious visitor experiences a modern, professional, and visually appe
 - **FR-006**: Landing page MUST include a footer with links to privacy policy, terms of service, and contact information
 - **FR-007**: All CTAs MUST direct users to appropriate destinations (signup page, login page, or dashboard for authenticated users)
 - **FR-008**: Landing page MUST load critical above-the-fold content within 2 seconds on 4G connections
-- **FR-009**: Landing page MUST implement smooth scroll animations and micro-interactions for enhanced user engagement
+- **FR-009**: Landing page MUST implement smooth scroll animations using lightweight techniques (CSS transitions, Intersection Observer) to maintain performance scores; heavy animation libraries (GSAP, etc.) are explicitly excluded
 - **FR-010**: Landing page MUST include a benefits/how-it-works section explaining the user workflow
 - **FR-011**: Landing page MUST display a clear visual hierarchy with consistent spacing, typography, and color scheme
 - **FR-012**: Navigation MUST be sticky/fixed on scroll for easy access to CTA buttons
@@ -144,7 +144,7 @@ A design-conscious visitor experiences a modern, professional, and visually appe
 
 ## Assumptions
 
-1. **Content availability**: We assume marketing copy, feature descriptions, and testimonials will be provided or can use placeholder content initially
+1. **Content availability**: We assume marketing copy, feature descriptions, and testimonials will be provided or can use realistic placeholders for the social proof section (e.g., "Company X", "200% increase") to demonstrate layout and potential.
 2. **Brand assets**: We assume brand colors, logo, and typography guidelines exist or will use modern defaults (e.g., Inter font, blue primary color)
 3. **Visual assets**: We assume product screenshots or illustrations will be created or can use high-quality stock imagery/illustrations
 4. **Analytics**: We assume analytics tracking (Google Analytics, Plausible, or similar) will be configured separately
@@ -152,7 +152,7 @@ A design-conscious visitor experiences a modern, professional, and visually appe
 6. **Deployment**: We assume the landing page will be hosted on the same domain as the application (root path `/`)
 7. **Browser support**: We assume modern evergreen browsers (Chrome, Firefox, Safari, Edge) from the last 2 years
 8. **Authentication state**: We assume the application can detect if a user is logged in to show appropriate CTAs
-9. **Design system**: We assume the landing page will establish or follow the application's design system (colors, components, spacing)
+9. **Design system**: The landing page will establish a new, elevated visual identity (Modern SaaS style) that extends the core brand but uses richer styling (gradients, glassmorphism, larger typography) than the internal dashboard.
 10. **Performance budget**: We assume total page weight should be under 1MB for initial load, 3MB for complete page
 
 ## Out of Scope
@@ -188,6 +188,13 @@ A design-conscious visitor experiences a modern, professional, and visually appe
 | Responsive design edge cases | Low - Testing across all devices is time-consuming | Use mobile-first approach, test on common breakpoints (320px, 768px, 1024px, 1440px) |
 | Over-engineering animations | Low - Complex animations may hurt performance | Keep animations subtle (fade, slide), use CSS transitions over JavaScript, respect prefers-reduced-motion |
 | Scope creep with "best of the best" | High - Ambiguous requirement may lead to endless iterations | Define "best" as: fast loading, accessible, modern design, high conversion - ship MVP and iterate |
+
+## Clarifications
+
+### Session 2025-12-10
+- Q: How should the landing page design relate to the existing application's utility-focused UI? → A: **Modern SaaS Upgrade**: Create a premium visual identity (gradients, glassmorphism, larger typography) that elevates the brand beyond the internal app's utility style.
+- Q: How should we balance the "cool" animation requirement with the strict performance goals (Lighthouse 90+)? → A: **Subtle & Performant**: Use lightweight CSS transitions and Intersection Observer for scroll effects to ensure high Lighthouse scores, avoiding heavy animation libraries.
+- Q: Since the requirement mentions "best of the best" but assumes placeholder content, how should we handle the "Social Proof" (testimonials/stats) section for the initial launch? → A: **Realistic Placeholders**: The Social Proof section will use high-quality, realistic placeholder text and visual elements to demonstrate the layout's potential for the initial launch.
 
 ## Open Questions
 
