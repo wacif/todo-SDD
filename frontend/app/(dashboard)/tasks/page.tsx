@@ -265,7 +265,7 @@ function TasksContent() {
     <div className="min-h-screen bg-muted">
       <Navigation userName={userName} />
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
+      <main id="main-content" className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header with filters and actions */}
         <div className="mb-6 flex items-center justify-between">
           <div>
