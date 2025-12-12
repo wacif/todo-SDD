@@ -37,6 +37,8 @@
 - [ ] Clean architecture: changes confined to appropriate layer(s)
 - [ ] Phase alignment: feature belongs to the current phase requirements
 - [ ] Security: auth boundaries and user isolation considered (Phase II+)
+- [ ] Documentation: Context7 used for library docs (or gap documented)
+- [ ] Repo layout: monorepo boundaries respected (`frontend/`, `backend/`, `specs/`)
 
 ## Project Structure
 

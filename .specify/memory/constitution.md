@@ -1,12 +1,14 @@
 <!--
 Sync Impact Report
 
-- Version change: 1.0.0 → 1.1.0
+- Version change: 1.1.0 → 1.2.0
 - Modified principles:
    - I. Spec-Driven Development (clarified “no manual code” enforcement)
    - III. Test-First Development (clarified required test mapping to acceptance scenarios)
 - Added sections:
    - VIII. Spec Re-baselining & Alignment (NON-NEGOTIABLE)
+   - IX. Documentation & Research Discipline (Context7-first)
+   - X. Monorepo Organization (NON-NEGOTIABLE)
    - Better Auth token verification compatibility note (Phase II security)
 - Removed sections: none
 - Templates requiring updates:
@@ -79,6 +81,32 @@ Sync Impact Report
 
 **Rationale**: The hackathon grading is based on spec-driven iteration. Re-baselining prevents drift.
 
+### IX. Documentation & Research Discipline (Context7-first)
+
+**When gathering library/framework documentation, agents MUST use Context7 first:**
+- Prefer Context7 for authoritative, up-to-date API references and examples
+- If Context7 does not have the needed library/page, document the gap in the plan and use the next
+   most authoritative source (official docs), noting the URL
+- Avoid copy-pasting large blocks of external text; summarize and link
+
+**Rationale**: Reduces hallucinations and keeps design decisions grounded in current docs.
+
+### X. Monorepo Organization (NON-NEGOTIABLE)
+
+**This project MUST remain a monorepo with clear boundaries:**
+- `frontend/` contains the Next.js app and frontend-only dependencies
+- `backend/` contains the FastAPI app, migrations, and backend-only dependencies
+- `specs/` contains all specs (per-phase and per-feature)
+- `.specify/` contains templates, memory, and Spec-Kit workflow assets
+- `history/` contains PHRs and ADRs
+
+**Rules:**
+- No accidental extra app scaffolds in repository root (e.g., stray `package.json`, `node_modules/`)
+- Shared docs live at repo root (`README.md`, `CLAUDE.md`, `AGENTS.md` if used)
+- Cross-cutting changes MUST update both stack parts when required (API contract, auth, env vars)
+
+**Rationale**: Enables cross-stack, spec-driven iteration with a single source of truth.
+
 ### IV. Clean Architecture & Separation of Concerns
 
 **Layer isolation:**
@@ -139,8 +167,7 @@ src/
 - Graceful error handling with helpful suggestions
 
 **Technology stack (Phase III):**
-- OpenAI ChatKit for chat interface
-- OpenAI Agents SDK for agent orchestration
+- OpenAI ChatKit for chat interface and agent orchestration
 - Official MCP SDK for tool integration
 
 **Integration pattern:**
@@ -441,4 +468,4 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 - Create ADRs for architectural decisions
 - Record PHRs for learning and traceability
 
-**Version**: 1.1.0 | **Ratified**: 2025-12-06 | **Last Amended**: 2025-12-12
+**Version**: 1.2.0 | **Ratified**: 2025-12-06 | **Last Amended**: 2025-12-12
