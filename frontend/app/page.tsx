@@ -17,7 +17,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#030712] text-white">
       <Navbar onEnterApp={handleGetStarted} />
       <Hero onCtaClick={handleGetStarted} />
       <Features />
