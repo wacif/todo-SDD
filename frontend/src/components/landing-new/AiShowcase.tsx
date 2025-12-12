@@ -36,8 +36,8 @@ export const AiShowcase: React.FC = () => {
         <div className="relative z-10 container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           
           {/* Left Side: Text transitions */}
-          <div className="space-y-12">
-            <motion.div style={{ opacity: opacity1, y: yMove }} className="absolute md:relative">
+          <div className="relative min-h-[400px] flex items-center">
+            <motion.div style={{ opacity: opacity1, y: yMove }} className="absolute inset-0 flex flex-col justify-center">
               <div className="w-12 h-12 bg-gray-800 rounded-2xl flex items-center justify-center mb-6 border border-gray-700">
                 <Brain className="text-gray-400" />
               </div>
@@ -47,7 +47,7 @@ export const AiShowcase: React.FC = () => {
               </p>
             </motion.div>
 
-            <motion.div style={{ opacity: opacity2, y: yMove }} className="absolute md:relative">
+            <motion.div style={{ opacity: opacity2, y: yMove }} className="absolute inset-0 flex flex-col justify-center">
                <div className="w-12 h-12 bg-indigo-900/30 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/30">
                 <Workflow className="text-indigo-400" />
               </div>
@@ -57,7 +57,7 @@ export const AiShowcase: React.FC = () => {
               </p>
             </motion.div>
 
-            <motion.div style={{ opacity: opacity3, y: yMove }} className="absolute md:relative">
+            <motion.div style={{ opacity: opacity3, y: yMove }} className="absolute inset-0 flex flex-col justify-center">
                <div className="w-12 h-12 bg-purple-900/30 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/30">
                 <Sparkles className="text-purple-400" />
               </div>
