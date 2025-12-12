@@ -54,19 +54,21 @@ As a signed-in user, I can create tasks, edit their content, and delete them so 
 
 ---
 
-### User Story 3 — Complete Tasks And Keep Users Isolated (Priority: P3)
+### User Story 3 — Organize, Find, And Sort Tasks (Priority: P3)
 
-As a signed-in user, I can mark tasks complete/incomplete and trust that only I can access my tasks.
+As a signed-in user, I can assign priority and categories to tasks, and I can search, filter, and sort my task list so I can focus on what matters.
 
-**Why this priority**: Completion is the essential task lifecycle action; user isolation is required for a multi-user product.
+**Why this priority**: These are the required Phase II “intermediate” capabilities that make the web app meaningfully more powerful than Phase I.
 
-**Independent Test**: With two distinct user accounts, each account sees only its own tasks, and completion toggles persist.
+**Independent Test**: While signed in, I can create a few tasks with different priorities/categories, then reliably narrow and order the list via search/filter/sort.
 
 **Acceptance Scenarios**:
 
-1. **Given** I am signed in and have a task, **When** I mark it complete (or incomplete), **Then** the completion status updates and remains correct after refresh.
-2. **Given** User A and User B are different accounts, **When** User A views tasks, **Then** User A cannot see or modify any tasks belonging to User B.
-3. **Given** I am not signed in, **When** I attempt to access tasks, **Then** I cannot view or modify any tasks.
+1. **Given** I have tasks with different priorities, **When** I filter by a priority, **Then** only tasks matching that priority are shown.
+2. **Given** I have tasks with categories/tags, **When** I filter by a category/tag, **Then** only tasks matching that category/tag are shown.
+3. **Given** I have tasks with different completion statuses, **When** I filter by status (complete/incomplete), **Then** only tasks matching that status are shown.
+4. **Given** I have tasks with titles/descriptions, **When** I search by keyword, **Then** only tasks matching the keyword are shown.
+5. **Given** I have multiple tasks, **When** I sort tasks by a supported sort option, **Then** tasks are ordered accordingly and the ordering is stable.
 
 ---
 
@@ -80,6 +82,9 @@ As a signed-in user, I can mark tasks complete/incomplete and trust that only I 
 - Attempt for one user to access another user’s tasks (read/write)
 - Concurrent edits (two sessions modify the same task) and last-write behavior is consistent
 - Network/API failures return clear feedback without duplicating operations (e.g., accidental double-create)
+- Search returns no matches and the empty results state is clear
+- Filtering by multiple criteria yields expected intersections (e.g., incomplete + high priority)
+- Sorting when some tasks have missing optional fields used for ordering
 
 ## Requirements *(mandatory)*
 
@@ -94,14 +99,21 @@ As a signed-in user, I can mark tasks complete/incomplete and trust that only I 
 - **FR-007**: System MUST allow a signed-in user to update a task’s title and/or description.
 - **FR-008**: System MUST allow a signed-in user to delete a task.
 - **FR-009**: System MUST allow a signed-in user to mark a task complete and mark it incomplete.
-- **FR-010**: System MUST persist tasks such that they remain available across page refresh and future signed-in sessions.
-- **FR-011**: System MUST enforce per-user authorization such that users can only read/modify/delete their own tasks.
-- **FR-012**: System MUST provide user-friendly error feedback for validation failures and authorization failures.
+- **FR-010**: System MUST support setting a task priority (at least: high, medium, low).
+- **FR-011**: System MUST support assigning one or more categories/tags to a task.
+- **FR-012**: System MUST allow a signed-in user to search tasks by keyword (title and/or description).
+- **FR-013**: System MUST allow a signed-in user to filter tasks by completion status.
+- **FR-014**: System MUST allow a signed-in user to filter tasks by priority.
+- **FR-015**: System MUST allow a signed-in user to filter tasks by category/tag.
+- **FR-016**: System MUST allow a signed-in user to sort tasks by supported criteria (at least: priority, alphabetical).
+- **FR-017**: System MUST persist tasks such that they remain available across page refresh and future signed-in sessions.
+- **FR-018**: System MUST enforce per-user authorization such that users can only read/modify/delete their own tasks.
+- **FR-019**: System MUST provide user-friendly error feedback for validation failures and authorization failures.
 
 ### Key Entities *(include if feature involves data)*
 
 - **User**: An authenticated person using the application.
-- **Task**: A todo item owned by a user, including an ID, title, optional description, completion status, and timestamps.
+- **Task**: A todo item owned by a user, including an ID, title, optional description, completion status, priority, categories/tags, and timestamps.
 
 ## Success Criteria *(mandatory)*
 
@@ -116,3 +128,5 @@ As a signed-in user, I can mark tasks complete/incomplete and trust that only I 
 - **SC-002**: Tasks created by a user remain visible after refresh and after signing out/in again.
 - **SC-003**: Attempts to access tasks while signed out do not expose any user task data.
 - **SC-004**: In a two-user test, each user only sees their own tasks and cannot modify the other user’s tasks.
+- **SC-005**: A user can find a task via keyword search and narrow results via filters.
+- **SC-006**: A user can sort tasks and the ordering matches the chosen sort option.
