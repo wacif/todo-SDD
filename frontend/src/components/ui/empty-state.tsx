@@ -32,19 +32,19 @@ export function EmptyState({
       <div
         className={cn(
           'rounded-lg p-8',
-          variant === 'default' && 'bg-muted/30 border border-border'
+          variant === 'default' && 'bg-gray-900/30 border border-gray-800'
         )}
       >
         {Icon && (
           <Icon
-            className="mx-auto h-12 w-12 text-muted-foreground mb-4"
+            className="mx-auto h-12 w-12 text-gray-500 mb-4"
             aria-hidden="true"
             data-testid="empty-state-icon"
           />
         )}
-        <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+        <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
         {description && (
-          <p className="text-sm text-muted-foreground max-w-sm">{description}</p>
+          <p className="text-sm text-gray-400 max-w-sm">{description}</p>
         )}
         {action && (
           <div className="mt-6">

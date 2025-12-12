@@ -38,15 +38,15 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
             type="checkbox"
             checked={task.completed}
             onChange={() => onToggleComplete(task.id)}
-            className="mt-1 h-5 w-5 rounded border-border text-primary-600 focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
+            className="mt-1 h-5 w-5 rounded border-gray-700 text-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-950 cursor-pointer"
             aria-label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <h3
                 className={cn(
-                  'font-semibold text-foreground',
-                  task.completed && 'line-through text-muted-foreground'
+                  'font-semibold text-white',
+                  task.completed && 'line-through text-gray-500'
                 )}
               >
                 {task.title}
@@ -61,7 +61,7 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
             {task.description && (
               <p
                 className={cn(
-                  'text-sm text-muted-foreground mb-2',
+                  'text-sm text-gray-400 mb-2',
                   task.completed && 'line-through'
                 )}
               >
@@ -69,7 +69,7 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
               </p>
             )}
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">{formattedDate}</span>
+              <span className="text-xs text-gray-500">{formattedDate}</span>
               <div className="flex gap-2">
                 {onEdit && (
                   <Button

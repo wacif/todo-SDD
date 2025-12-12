@@ -110,7 +110,7 @@ export function Modal({ open, onClose, size = 'md', children }: ModalProps) {
           role="dialog"
           aria-modal="true"
           className={cn(
-            'relative bg-background rounded-lg shadow-xl w-full',
+            'relative bg-gray-900 border border-gray-800 rounded-lg shadow-xl w-full',
             sizeClasses[size]
           )}
           onClick={(e) => e.stopPropagation()}
@@ -148,16 +148,16 @@ function ModalHeader({ children, className }: ModalHeaderProps) {
   }, [headerId])
 
   return (
-    <div className={cn('flex items-center justify-between p-6 border-b border-border', className)}>
-      <h2 id={headerId} className="text-xl font-semibold text-foreground">
+    <div className={cn('flex items-center justify-between p-6 border-b border-gray-800', className)}>
+      <h2 id={headerId} className="text-xl font-semibold text-white">
         {children}
       </h2>
       <button
         onClick={onClose}
-        className="rounded-md p-1 hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+        className="rounded-md p-1 hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
         aria-label="Close modal"
       >
-        <X className="h-5 w-5 text-muted-foreground" />
+        <X className="h-5 w-5 text-gray-400" />
       </button>
     </div>
   )
@@ -179,7 +179,7 @@ interface ModalFooterProps {
 
 function ModalFooter({ children, className }: ModalFooterProps) {
   return (
-    <div className={cn('flex items-center justify-end gap-3 p-6 border-t border-border', className)}>
+    <div className={cn('flex items-center justify-end gap-3 p-6 border-t border-gray-800', className)}>
       {children}
     </div>
   )

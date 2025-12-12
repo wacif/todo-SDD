@@ -56,19 +56,19 @@ export default function AuthForm({
     mode === 'signup' ? getPasswordStrength(formData.password) : null
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#030712] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             {mode === 'signup' ? 'Create your account' : 'Sign in to your account'}
           </h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
+          <p className="mt-2 text-center text-sm text-gray-400">
             {mode === 'signup' ? (
               <>
                 Already have an account?{' '}
                 <Link
                   href="/login"
-                  className="font-medium text-primary-600 hover:text-primary-700"
+                  className="font-medium text-indigo-400 hover:text-indigo-300"
                 >
                   Sign in
                 </Link>
@@ -78,7 +78,7 @@ export default function AuthForm({
                 Don't have an account?{' '}
                 <Link
                   href="/signup"
-                  className="font-medium text-primary-600 hover:text-primary-700"
+                  className="font-medium text-indigo-400 hover:text-indigo-300"
                 >
                   Sign up
                 </Link>
@@ -146,36 +146,36 @@ export default function AuthForm({
                   <div
                     className={`h-1 flex-1 rounded ${
                       passwordStrength === 'weak'
-                        ? 'bg-error'
+                        ? 'bg-red-500'
                         : passwordStrength === 'medium'
-                          ? 'bg-warning'
-                          : 'bg-success'
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
                     }`}
                   />
                   <div
                     className={`h-1 flex-1 rounded ${
                       passwordStrength === 'medium'
-                        ? 'bg-warning'
+                        ? 'bg-yellow-500'
                         : passwordStrength === 'strong'
-                          ? 'bg-success'
-                          : 'bg-muted'
+                          ? 'bg-green-500'
+                          : 'bg-gray-700'
                     }`}
                   />
                   <div
                     className={`h-1 flex-1 rounded ${
                       passwordStrength === 'strong'
-                        ? 'bg-success'
-                        : 'bg-muted'
+                        ? 'bg-green-500'
+                        : 'bg-gray-700'
                     }`}
                   />
                 </div>
                 <p
                   className={`mt-1 text-xs ${
                     passwordStrength === 'weak'
-                      ? 'text-error'
+                      ? 'text-red-400'
                       : passwordStrength === 'medium'
-                        ? 'text-warning'
-                        : 'text-success'
+                        ? 'text-yellow-400'
+                        : 'text-green-400'
                   }`}
                 >
                   {passwordStrength === 'weak'
@@ -189,10 +189,10 @@ export default function AuthForm({
           </div>
 
           {error && (
-            <div className="rounded-md bg-error/10 border border-error/20 p-4">
+            <div className="rounded-md bg-red-500/10 border border-red-500/20 p-4">
               <div className="flex">
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-error">{error}</h3>
+                  <h3 className="text-sm font-medium text-red-400">{error}</h3>
                 </div>
               </div>
             </div>
@@ -212,7 +212,7 @@ export default function AuthForm({
         </form>
 
         {mode === 'signup' && (
-          <div className="text-xs text-center text-muted-foreground">
+          <div className="text-xs text-center text-gray-400">
             By signing up, you agree to our Terms of Service and Privacy Policy
           </div>
         )}

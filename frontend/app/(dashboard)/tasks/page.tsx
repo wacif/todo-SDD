@@ -251,24 +251,24 @@ function TasksContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-[#030712]">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <p className="mt-2 text-muted-foreground">Loading tasks...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+          <p className="mt-2 text-gray-400">Loading tasks...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-[#030712]">
       <Navigation userName={userName} />
 
       <main id="main-content" className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header with filters and actions */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">My Tasks</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">My Tasks</h1>
             <div className="flex gap-2">
               <Button
                 variant={filter === 'all' ? 'primary' : 'ghost'}
