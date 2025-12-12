@@ -1,32 +1,24 @@
-'use client'
-
-import React, { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
-import { Brain, Sparkles, Workflow, ArrowDown } from 'lucide-react'
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { Brain, Sparkles, Workflow, ArrowDown } from 'lucide-react';
 
 export const AiShowcase: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null)
-  
+  const targetRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  })
+    target: targetRef,
+    offset: ["start start", "end end"]
+  });
 
-  // Phase 1: Understanding (0% - 33%)
-  const opacity1 = useTransform(scrollYProgress, [0.15, 0.25, 0.4], [0, 1, 0])
-  
-  // Phase 2: Structuring (33% - 66%)
-  const opacity2 = useTransform(scrollYProgress, [0.35, 0.45, 0.6, 0.7], [0, 1, 1, 0])
-  
-  // Phase 3: Flow State (66% - 100%)
-  const opacity3 = useTransform(scrollYProgress, [0.65, 0.75, 0.9], [0, 1, 1])
+  const opacity1 = useTransform(scrollYProgress, [0, 0.3, 0.4], [1, 1, 0]);
+  const opacity2 = useTransform(scrollYProgress, [0.3, 0.4, 0.6, 0.7], [0, 1, 1, 0]);
+  const opacity3 = useTransform(scrollYProgress, [0.6, 0.7, 1], [0, 1, 1]);
 
-  const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1.2])
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 180])
-  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0.85, 1], [1, 0])
+  const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1.2]);
+  const rotate = useTransform(scrollYProgress, [0, 1], [0, 180]);
+  const yMove = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
   return (
-    <section id="ai-showcase" ref={containerRef} className="relative h-[300vh] bg-[#050507]">
+    <section id="ai-showcase" ref={targetRef} className="relative h-[300vh] bg-[#050507]">
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
         
         {/* Animated Background Grid */}
@@ -41,52 +33,34 @@ export const AiShowcase: React.FC = () => {
         <div className="relative z-10 container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           
           {/* Left Side: Text transitions */}
-          <div className="relative min-h-[400px]">
-            <motion.div 
-              style={{ opacity: opacity1 }} 
-              className="absolute inset-0 flex flex-col justify-center"
-            >
+          <div className="space-y-12">
+            <motion.div style={{ opacity: opacity1, y: yMove }} className="absolute md:relative">
               <div className="w-12 h-12 bg-gray-800 rounded-2xl flex items-center justify-center mb-6 border border-gray-700">
                 <Brain className="text-gray-400" />
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                It starts with <br/> 
-                <span className="text-gray-500">Understanding.</span>
-              </h2>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">It starts with <br/> <span className="text-gray-500">Understanding.</span></h2>
               <p className="text-xl text-gray-400 max-w-md">
-                TaskFlow doesn't just store your tasks. It reads them. Our AI analyzes intent, urgency, and context from a single sentence.
+                FlowState doesn't just store your tasks. It reads them. Our neural engine analyzes intent, urgency, and context from a single sentence.
               </p>
             </motion.div>
 
-            <motion.div 
-              style={{ opacity: opacity2 }} 
-              className="absolute inset-0 flex flex-col justify-center"
-            >
+            <motion.div style={{ opacity: opacity2, y: yMove }} className="absolute md:relative">
                <div className="w-12 h-12 bg-indigo-900/30 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/30">
                 <Workflow className="text-indigo-400" />
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Structuring <br/> 
-                <span className="text-indigo-500">Complexity.</span>
-              </h2>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Structuring <br/> <span className="text-indigo-500">Complexity.</span></h2>
               <p className="text-xl text-gray-400 max-w-md">
-                Complex goals are broken down instantly. Vague ideas become actionable checklists. AI restructures your chaos into a linear path.
+                Complex goals are broken down instantly. Vague ideas become actionable checklists. The AI restructures your chaos into a linear path.
               </p>
             </motion.div>
 
-            <motion.div 
-              style={{ opacity: opacity3 }} 
-              className="absolute inset-0 flex flex-col justify-center"
-            >
+            <motion.div style={{ opacity: opacity3, y: yMove }} className="absolute md:relative">
                <div className="w-12 h-12 bg-purple-900/30 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/30">
                 <Sparkles className="text-purple-400" />
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Achieving <br/> 
-                <span className="text-purple-500">Flow State.</span>
-              </h2>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Achieving <br/> <span className="text-purple-500">Flow State.</span></h2>
               <p className="text-xl text-gray-400 max-w-md">
-                With your path clear, you enter the zone. TaskFlow manages the cognitive load so you can focus purely on execution.
+                With your path clear, you enter the zone. FlowState manages the cognitive load so you can focus purely on execution.
               </p>
             </motion.div>
           </div>
@@ -133,10 +107,10 @@ export const AiShowcase: React.FC = () => {
                         <Brain size={64} className="text-white relative z-10" />
                     </div>
                     <div className="mt-8 flex gap-2">
-                        <span className="w-1 h-8 bg-indigo-500 rounded-full animate-pulse"></span>
-                        <span className="w-1 h-12 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-                        <span className="w-1 h-6 bg-pink-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
-                        <span className="w-1 h-10 bg-indigo-500 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></span>
+                        <span className="w-1 h-8 bg-indigo-500 rounded-full animate-[height_1s_ease-in-out_infinite]"></span>
+                        <span className="w-1 h-12 bg-purple-500 rounded-full animate-[height_1.2s_ease-in-out_infinite]"></span>
+                        <span className="w-1 h-6 bg-pink-500 rounded-full animate-[height_0.8s_ease-in-out_infinite]"></span>
+                        <span className="w-1 h-10 bg-indigo-500 rounded-full animate-[height_1.1s_ease-in-out_infinite]"></span>
                     </div>
                 </motion.div>
 
@@ -167,7 +141,7 @@ export const AiShowcase: React.FC = () => {
         
         {/* Scroll indicator */}
         <motion.div 
-            style={{ opacity: scrollIndicatorOpacity }}
+            style={{ opacity: useTransform(scrollYProgress, [0.9, 1], [1, 0]) }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gray-500 flex flex-col items-center gap-2"
         >
             <span className="text-xs uppercase tracking-widest">Scroll to explore</span>
@@ -175,5 +149,5 @@ export const AiShowcase: React.FC = () => {
         </motion.div>
       </div>
     </section>
-  )
-}
+  );
+};
