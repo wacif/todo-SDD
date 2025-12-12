@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { LogOut, User, Sparkles } from 'lucide-react'
 
 interface NavigationProps {
   userName?: string
@@ -34,27 +35,38 @@ export function Navigation({ userName, onLogout, className }: NavigationProps) {
   return (
     <nav
       className={cn(
-        'sticky top-0 z-40 w-full border-b border-gray-800 bg-[#030712]',
+        'sticky top-0 z-40 w-full border-b border-gray-800/50 bg-[#030712]/80 backdrop-blur-xl',
         className
       )}
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 max-w-5xl">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-white">TaskFlow</h1>
+          <div className="flex items-center gap-2 group cursor-pointer" onClick={() => router.push('/tasks')}>
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400 group-hover:bg-indigo-500/30 group-hover:text-indigo-300 transition-all duration-300">
+              <Sparkles className="h-5 w-5" />
+              <div className="absolute inset-0 rounded-lg bg-indigo-500/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+            <span className="text-lg font-bold text-white tracking-tight">TaskFlow</span>
           </div>
 
           <div className="flex items-center gap-4">
             {userName && (
-              <span className="text-sm text-gray-400">{userName}</span>
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-900/50 border border-gray-800">
+                <div className="h-6 w-6 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                  <User className="h-3.5 w-3.5 text-indigo-400" />
+                </div>
+                <span className="text-sm font-medium text-gray-300">{userName}</span>
+              </div>
             )}
             <Button
               variant="ghost"
               onClick={handleLogout}
               isLoading={isLoggingOut}
               disabled={isLoggingOut}
+              className="text-gray-400 hover:text-white hover:bg-gray-800/50 gap-2"
             >
-              {isLoggingOut ? 'Logging out...' : 'Sign Out'}
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">{isLoggingOut ? 'Logging out...' : 'Sign Out'}</span>
             </Button>
           </div>
         </div>

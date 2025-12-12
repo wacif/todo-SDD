@@ -10,10 +10,15 @@ from sqlmodel import Session
 from src.api.dependencies import get_current_user_id
 from src.api.models.task_models import TaskInputDTO, TaskListResponse, TaskResponse
 from src.application.dto.task_dto import TaskDTO
-from src.application.dto.task_input_dto import TaskInputDTO as UseCaseTaskInputDTO
+from src.application.dto.task_input_dto import (
+    TaskInputDTO as UseCaseTaskInputDTO,
+    TaskUpdateDTO,
+)
 from src.application.use_cases.add_task import AddTaskUseCase
+from src.application.use_cases.delete_task import DeleteTaskUseCase
 from src.application.use_cases.list_tasks import ListTasksUseCase
 from src.application.use_cases.mark_task_complete import MarkTaskCompleteUseCase
+from src.application.use_cases.update_task import UpdateTaskUseCase
 from src.domain.exceptions.domain_exceptions import (
     EntityNotFoundError,
     UnauthorizedError,
@@ -144,7 +149,76 @@ async def list_tasks(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
-@router.patch("/{user_id}/tasks/{task_id}/complete", response_model=TaskResponse)
+@router.put("/{user_id}/tasks/{task_id}", response_model=TaskResponse)
+async def update_task(
+    user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
+    task_id: Annotated[int, Path(description="Task ID to update")],
+    request: TaskInputDTO,
+    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
+    task_repository: TaskRepository = Depends(get_task_repository),
+):
+    """
+    Update an existing task.
+
+    - Requires JWT authentication
+    - User can only update their own tasks
+    - Updates title and description
+    """
+    # Validate user ownership
+    validate_user_ownership(user_id, current_user_id)
+
+    # Create update DTO
+    update_dto = TaskUpdateDTO(
+        task_id=task_id,
+        user_id=current_user_id,
+        title=request.title,
+        description=request.description,
+    )
+
+    try:
+        # Execute use case
+        use_case = UpdateTaskUseCase(task_repository)
+        task_dto = use_case.execute(update_dto)
+
+        # Convert to API response
+        return task_dto_to_response(task_dto)
+
+    except EntityNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except UnauthorizedError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except ValidationError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.delete("/{user_id}/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_task(
+    user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
+    task_id: Annotated[int, Path(description="Task ID to delete")],
+    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
+    task_repository: TaskRepository = Depends(get_task_repository),
+):
+    """
+    Delete a task.
+
+    - Requires JWT authentication
+    - User can only delete their own tasks
+    """
+    # Validate user ownership
+    validate_user_ownership(user_id, current_user_id)
+
+    try:
+        # Execute use case
+        use_case = DeleteTaskUseCase(task_repository)
+        use_case.execute(task_id, current_user_id)
+
+    except EntityNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except UnauthorizedError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+
+@router.put("/{user_id}/tasks/{task_id}/complete", response_model=TaskResponse)
 async def toggle_task_complete(
     user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
     task_id: Annotated[int, Path(description="Task ID to toggle completion status")],

@@ -28,32 +28,37 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center p-8 text-center', className)}>
+    <div className={cn('flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in duration-500', className)}>
       <div
         className={cn(
-          'rounded-lg p-8',
-          variant === 'default' && 'bg-gray-900/30 border border-gray-800'
+          'rounded-2xl p-10 flex flex-col items-center',
+          variant === 'default' && 'bg-gray-900/30 border border-gray-800 backdrop-blur-sm'
         )}
       >
         {Icon && (
-          <Icon
-            className="mx-auto h-12 w-12 text-gray-500 mb-4"
-            aria-hidden="true"
-            data-testid="empty-state-icon"
-          />
+          <div className="relative mb-6 group">
+            <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative h-16 w-16 rounded-2xl bg-gray-800/50 border border-gray-700 flex items-center justify-center shadow-inner">
+              <Icon
+                className="h-8 w-8 text-gray-400 group-hover:text-indigo-400 transition-colors duration-300"
+                aria-hidden="true"
+                data-testid="empty-state-icon"
+              />
+            </div>
+          </div>
         )}
-        <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+        <h3 className="text-xl font-semibold text-white mb-2 tracking-tight">{title}</h3>
         {description && (
-          <p className="text-sm text-gray-400 max-w-sm">{description}</p>
+          <p className="text-gray-400 max-w-sm leading-relaxed">{description}</p>
         )}
         {action && (
-          <div className="mt-6">
+          <div className="mt-8">
             {action.href ? (
               <Link href={action.href}>
-                <Button>{action.label}</Button>
+                <Button className="shadow-lg shadow-indigo-500/20">{action.label}</Button>
               </Link>
             ) : (
-              <Button onClick={action.onClick}>{action.label}</Button>
+              <Button onClick={action.onClick} className="shadow-lg shadow-indigo-500/20">{action.label}</Button>
             )}
           </div>
         )}

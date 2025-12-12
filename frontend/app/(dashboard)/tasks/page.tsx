@@ -8,7 +8,9 @@ import { TaskForm } from '@/components/dashboard/TaskForm'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { ToastProvider, useToast } from '@/components/ui/toast'
-import { Plus } from 'lucide-react'
+import { Plus, ListFilter, CheckCircle2, Circle } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 interface Task {
   id: string
@@ -261,41 +263,68 @@ function TasksContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712]">
+    <div className="min-h-screen bg-[#030712] relative overflow-hidden">
+      {/* Background Gradients */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px]" />
+      </div>
+
       <Navigation userName={userName} />
 
-      <main id="main-content" className="container mx-auto px-4 py-8 max-w-5xl">
+      <main id="main-content" className="container mx-auto px-4 py-12 max-w-5xl relative z-10">
         {/* Header with filters and actions */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">My Tasks</h1>
-            <div className="flex gap-2">
-              <Button
-                variant={filter === 'all' ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setFilter('all')}
-              >
-                All
-              </Button>
-              <Button
-                variant={filter === 'pending' ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setFilter('pending')}
-              >
-                Pending
-              </Button>
-              <Button
-                variant={filter === 'completed' ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setFilter('completed')}
-              >
-                Completed
-              </Button>
-            </div>
+            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">My Tasks</h1>
+            <p className="text-gray-400">Manage your daily goals and track progress.</p>
           </div>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
+          
+          <div className="flex items-center gap-3 bg-gray-900/50 p-1.5 rounded-xl border border-gray-800 backdrop-blur-sm">
+            <button
+              onClick={() => setFilter('all')}
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2",
+                filter === 'all' 
+                  ? "bg-indigo-500/20 text-indigo-300 shadow-sm" 
+                  : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+              )}
+            >
+              <ListFilter className="w-4 h-4" />
+              All
+            </button>
+            <button
+              onClick={() => setFilter('pending')}
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2",
+                filter === 'pending' 
+                  ? "bg-amber-500/20 text-amber-300 shadow-sm" 
+                  : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+              )}
+            >
+              <Circle className="w-4 h-4" />
+              Pending
+            </button>
+            <button
+              onClick={() => setFilter('completed')}
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2",
+                filter === 'completed' 
+                  ? "bg-emerald-500/20 text-emerald-300 shadow-sm" 
+                  : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+              )}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Completed
+            </button>
+          </div>
+
+          <Button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:scale-105"
+          >
             <Plus className="h-5 w-5 mr-2" />
-            Add Task
+            New Task
           </Button>
         </div>
 
@@ -311,8 +340,8 @@ function TasksContent() {
 
       {/* Create Task Modal */}
       <Modal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
-        <Modal.Content>
-          <Modal.Header>Create New Task</Modal.Header>
+        <Modal.Content className="bg-[#0a0f1e] border-gray-800">
+          <Modal.Header className="text-white border-gray-800">Create New Task</Modal.Header>
           <Modal.Body>
             <TaskForm
               onSubmit={handleCreateTask}
@@ -324,8 +353,8 @@ function TasksContent() {
 
       {/* Edit Task Modal */}
       <Modal open={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
-        <Modal.Content>
-          <Modal.Header>Edit Task</Modal.Header>
+        <Modal.Content className="bg-[#0a0f1e] border-gray-800">
+          <Modal.Header className="text-white border-gray-800">Edit Task</Modal.Header>
           <Modal.Body>
             <TaskForm
               initialTask={editingTask || undefined}

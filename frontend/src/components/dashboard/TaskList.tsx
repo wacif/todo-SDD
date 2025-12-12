@@ -4,6 +4,7 @@ import * as React from 'react'
 import { TaskCard } from './TaskCard'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Inbox } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Task {
   id: string
@@ -43,27 +44,55 @@ export function TaskList({
 
   if (filteredTasks.length === 0) {
     return (
-      <EmptyState
-        icon={Inbox}
-        title={emptyMessage}
-        description="Create your first task to get started"
-        variant="minimal"
-      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <EmptyState
+          icon={Inbox}
+          title={emptyMessage}
+          description="Create your first task to get started"
+          variant="minimal"
+          className="bg-gray-900/30 border border-gray-800 rounded-xl backdrop-blur-sm"
+        />
+      </motion.div>
     )
   }
 
   return (
-    <ul className="space-y-3">
-      {filteredTasks.map((task) => (
-        <li key={task.id}>
-          <TaskCard
-            task={task}
-            onToggleComplete={onToggleComplete}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        </li>
-      ))}
-    </ul>
+    <motion.ul 
+      className="space-y-3"
+      initial="hidden"
+      animate="visible"
+      variants={{
+        visible: {
+          transition: {
+            staggerChildren: 0.05
+          }
+        }
+      }}
+    >
+      <AnimatePresence mode="popLayout">
+        {filteredTasks.map((task) => (
+          <motion.li 
+            key={task.id}
+            layout
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 }
+            }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+          >
+            <TaskCard
+              task={task}
+              onToggleComplete={onToggleComplete}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          </motion.li>
+        ))}
+      </AnimatePresence>
+    </motion.ul>
   )
 }
