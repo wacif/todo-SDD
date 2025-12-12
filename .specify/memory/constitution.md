@@ -1,3 +1,21 @@
+<!--
+Sync Impact Report
+
+- Version change: 1.0.0 → 1.1.0
+- Modified principles:
+   - I. Spec-Driven Development (clarified “no manual code” enforcement)
+   - III. Test-First Development (clarified required test mapping to acceptance scenarios)
+- Added sections:
+   - VIII. Spec Re-baselining & Alignment (NON-NEGOTIABLE)
+   - Better Auth token verification compatibility note (Phase II security)
+- Removed sections: none
+- Templates requiring updates:
+   - ✅ `.specify/templates/plan-template.md`
+   - ✅ `.specify/templates/spec-template.md`
+   - ✅ `.specify/templates/tasks-template.md` (no change needed)
+- Follow-up TODOs: none
+-->
+
 # Evolution of Todo Constitution
 
 ## Core Principles
@@ -46,6 +64,20 @@
 - End-to-end tests for user workflows (Phase II+)
 
 **Rationale**: Ensures correctness, enables confident refactoring, and validates spec completeness.
+
+### VIII. Spec Re-baselining & Alignment (NON-NEGOTIABLE)
+
+**When requirements change, specs MUST be re-baselined before code changes:**
+- Specs are the source of truth; implementation is disposable
+- If an implemented behavior does not match current hackathon requirements, update the spec first
+- Existing specs MUST be brought up to date (or explicitly marked **Deprecated**) before planning new work
+- Each phase MUST have a complete spec set for its required features before it is considered “done”
+
+**Spec status rules:**
+- Each feature spec MUST declare a status: Draft | Approved | Deprecated
+- Deprecated specs MUST remain in the repo for auditability, but MUST NOT drive new implementation
+
+**Rationale**: The hackathon grading is based on spec-driven iteration. Re-baselining prevents drift.
 
 ### IV. Clean Architecture & Separation of Concerns
 
@@ -320,6 +352,11 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 - Priorities and tags/categories working
 - Test coverage ≥ 85%
 
+**Security note (Phase II):**
+- The backend MUST verify Better Auth-issued tokens in a way that matches the configured signing
+   strategy (e.g., shared-secret JWT verification or JWKS-based verification).
+- The authenticated user identity MUST be enforced consistently across API routes and persistence.
+
 ### Phase III Requirements (Due: Dec 21, 2025)
 
 **Additional Deliverables:**
@@ -404,4 +441,4 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 - Create ADRs for architectural decisions
 - Record PHRs for learning and traceability
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-06 | **Last Amended**: 2025-12-06
+**Version**: 1.1.0 | **Ratified**: 2025-12-06 | **Last Amended**: 2025-12-12
