@@ -25,7 +25,7 @@ export function Navigation({ userName, onLogout, className }: NavigationProps) {
       localStorage.removeItem('token')
       router.push('/login')
     } catch (error) {
-      console.error('Logout error:', error)
+      // Silently handle logout errors - user will be redirected to login anyway
     } finally {
       setIsLoggingOut(false)
     }

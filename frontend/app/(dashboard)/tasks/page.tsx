@@ -73,7 +73,6 @@ function TasksContent() {
         description: 'Failed to load tasks. Please try again.',
         variant: 'destructive',
       })
-      console.error('Error loading tasks:', err)
     } finally {
       setLoading(false)
     }

@@ -68,7 +68,6 @@ export default function TaskForm({
       await onSubmit({ title: title.trim(), description: description.trim() });
     } catch (err) {
       // Error handling is done by parent component
-      console.error('Form submission error:', err);
     }
   };
 

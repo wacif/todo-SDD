@@ -21,7 +21,6 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Handle form submission, e.g., send a PUT request to your API
-    console.log("Updated task:", { id, title })
     router.push("/tasks")
   }
 

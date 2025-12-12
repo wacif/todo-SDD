@@ -64,7 +64,8 @@ export function TaskForm({ onSubmit, onCancel, initialTask }: TaskFormProps) {
         setErrors({})
       }
     } catch (error) {
-      console.error('Form submission error:', error)
+      // Error is handled by the parent component with toast notification
+      throw error
     } finally {
       setIsSubmitting(false)
     }

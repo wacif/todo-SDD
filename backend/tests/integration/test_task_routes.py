@@ -210,8 +210,6 @@ def test_user_isolation(client, auth_user):
         json={"title": "User 1 task"},
         headers={"Authorization": f"Bearer {auth_user['token']}"},
     )
-    if response_create1.status_code != 201:
-        print(f"Error creating task for user 1: {response_create1.json()}")
     assert response_create1.status_code == 201
 
     # Create second user
