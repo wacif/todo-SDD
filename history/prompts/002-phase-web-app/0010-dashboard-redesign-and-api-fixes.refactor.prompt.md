@@ -1,30 +1,7 @@
 ---
-id: 0010
-title: dashboard-redesign-and-api-fixes
-stage: refactor
-date: 2025-12-12
-surface: VS Code
-model: Gemini 3 Pro (Preview)
-feature: 002-phase-web-app
-branch: feat/dashboard-redesign
-user: wasi
-command: /sp.git.commit_pr
-labels: [ui, backend, redesign, bugfix]
-links:
-  spec: specs/002-phase-web-app/
-  ticket: 
-  adr: 
-  pr: https://github.com/wacif/todo-SDD/pull/4
-files:
-  - backend/src/api/routes/task_routes.py
-  - frontend/app/(dashboard)/tasks/page.tsx
-  - frontend/src/components/dashboard/Navigation.tsx
-  - frontend/src/components/dashboard/TaskCard.tsx
-  - frontend/src/components/dashboard/TaskForm.tsx
-  - frontend/src/components/dashboard/TaskList.tsx
-  - frontend/src/components/ui/empty-state.tsx
-tests:
-  - manual verification
+name: "phr-0010-dashboard-redesign-and-api-fixes.refactor"
+description: "stage=refactor | date=2025-12-12 | surface=VS Code | feature=002-phase-web-app | branch=feat/dashboard-redesign | user=wasi | command=/sp.git.commit_pr | labels=ui,backend,redesign,bugfix | spec=specs/002-phase-web-app/ | pr=https://github.com/wacif/todo-SDD/pull/4"
+model: "Gemini 3 Pro (Preview)"
 ---
 
 ## Prompt
