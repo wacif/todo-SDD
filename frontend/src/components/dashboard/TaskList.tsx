@@ -7,7 +7,7 @@ import { Inbox } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Task {
-  id: string
+  id: number
   title: string
   description: string | null
   completed: boolean
@@ -17,9 +17,9 @@ interface Task {
 
 interface TaskListProps {
   tasks: Task[]
-  onToggleComplete: (id: string) => void
+  onToggleComplete: (id: number) => void
   onEdit?: (task: Task) => void
-  onDelete?: (id: string) => void
+  onDelete?: (id: number) => void
   filter?: 'all' | 'pending' | 'completed'
   emptyMessage?: string
 }

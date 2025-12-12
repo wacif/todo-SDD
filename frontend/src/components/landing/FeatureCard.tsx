@@ -19,7 +19,7 @@ interface FeatureCardProps {
   feature: Feature;
 }
 
-export default function FeatureCard({ feature }: FeatureCardProps) {
+export function FeatureCard({ feature }: FeatureCardProps) {
   return (
     <Card className="group h-full transition-all duration-300 hover:shadow-lg">
       <CardHeader>

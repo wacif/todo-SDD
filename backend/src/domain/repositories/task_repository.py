@@ -1,7 +1,6 @@
 """Task repository interface - evolved from Phase I with user filtering."""
 
 from typing import Protocol
-from uuid import UUID
 
 from src.domain.entities.task import Task
 
@@ -30,7 +29,7 @@ class TaskRepository(Protocol):
         """
         ...
 
-    def get_by_id(self, task_id: int, user_id: UUID) -> Task:
+    def get_by_id(self, task_id: int, user_id: str) -> Task:
         """
         Retrieve a task by its ID (user-scoped).
 
@@ -47,7 +46,7 @@ class TaskRepository(Protocol):
         """
         ...
 
-    def list_by_user(self, user_id: UUID) -> list[Task]:
+    def list_by_user(self, user_id: str) -> list[Task]:
         """
         Retrieve all tasks for a specific user.
 
@@ -75,7 +74,7 @@ class TaskRepository(Protocol):
         """
         ...
 
-    def delete(self, task_id: int, user_id: UUID) -> None:
+    def delete(self, task_id: int, user_id: str) -> None:
         """
         Delete a task (user-scoped).
 

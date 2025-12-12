@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "your-secret-key-change-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expiration_days: int = 7
+    better_auth_secret: str = "better-auth-secret-must-match-frontend"
+
+    # Better Auth
+    better_auth_url: str = "http://localhost:3000"
 
     # Application
     app_env: str = "development"

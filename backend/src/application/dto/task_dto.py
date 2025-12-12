@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from uuid import UUID
 
 
 @dataclass(frozen=True)
@@ -15,7 +14,7 @@ class TaskDTO:
     """
 
     id: int
-    user_id: UUID
+    user_id: str
     title: str
     description: str
     completed: bool

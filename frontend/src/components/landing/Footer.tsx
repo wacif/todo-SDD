@@ -1,12 +1,12 @@
 // frontend/src/components/landing/Footer.tsx
 import React from 'react';
 import Link from 'next/link';
-import { Footer, FooterLink, SocialLink } from '@/lib/types/landing';
+import { Footer as FooterType, FooterLink, SocialLink } from '@/lib/types/landing';
 import { landingContent } from '@/lib/constants/landing-content';
 import { Code, GitBranch, Github, Linkedin, Twitter } from 'lucide-react'; // Placeholder icons - assuming Lucide is available
 
 interface FooterProps {
-  footerContent: Footer;
+  footerContent: FooterType;
 }
 
 const socialIconMap: Record<SocialLink['platform'], React.ElementType> = {
@@ -66,8 +66,6 @@ const FooterComponent: React.FC<FooterProps> = ({ footerContent }) => {
 };
 
 // Exporting the component with default content for ease of use
-const LandingFooter = () => <FooterComponent footerContent={landingContent.footer} />;
-export default LandingFooter;
-
+export const Footer = () => <FooterComponent footerContent={landingContent.footer} />;
 export { FooterComponent };
 

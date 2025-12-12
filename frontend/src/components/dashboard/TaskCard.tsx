@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface Task {
-  id: string
+  id: number
   title: string
   description: string | null
   completed: boolean
@@ -18,9 +18,9 @@ interface Task {
 
 interface TaskCardProps {
   task: Task
-  onToggleComplete: (id: string) => void
+  onToggleComplete: (id: number) => void
   onEdit?: (task: Task) => void
-  onDelete?: (id: string) => void
+  onDelete?: (id: number) => void
 }
 
 export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardProps) {

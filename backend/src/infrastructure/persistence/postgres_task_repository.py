@@ -1,7 +1,5 @@
 """PostgreSQL task repository implementation."""
 
-from uuid import UUID
-
 from sqlmodel import Session, select
 
 from src.domain.entities.task import Task
@@ -56,7 +54,7 @@ class PostgresTaskRepository:
             updated_at=task_model.updated_at,
         )
 
-    def get_by_id(self, task_id: int, user_id: UUID) -> Task:
+    def get_by_id(self, task_id: int, user_id: str) -> Task:
         """Retrieve a task by ID with user authorization."""
         statement = select(TaskModel).where(TaskModel.id == task_id)
         task_model = self._session.exec(statement).first()
@@ -78,7 +76,7 @@ class PostgresTaskRepository:
             updated_at=task_model.updated_at,
         )
 
-    def list_by_user(self, user_id: UUID) -> list[Task]:
+    def list_by_user(self, user_id: str) -> list[Task]:
         """Retrieve all tasks for a specific user."""
         statement = (
             select(TaskModel)
@@ -132,7 +130,7 @@ class PostgresTaskRepository:
             updated_at=task_model.updated_at,
         )
 
-    def delete(self, task_id: int, user_id: UUID) -> None:
+    def delete(self, task_id: int, user_id: str) -> None:
         """Delete a task with user authorization."""
         statement = select(TaskModel).where(TaskModel.id == task_id)
         task_model = self._session.exec(statement).first()

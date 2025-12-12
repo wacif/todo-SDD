@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from typing import Optional
-from uuid import UUID
 
 
 @dataclass(frozen=True)
@@ -14,7 +13,7 @@ class TaskInputDTO:
     Excludes auto-generated fields (id, timestamps).
     """
 
-    user_id: UUID
+    user_id: str
     title: str
     description: Optional[str] = None
     completed: bool = False
@@ -29,7 +28,7 @@ class TaskUpdateDTO:
     """
 
     task_id: int
-    user_id: UUID  # For authorization
+    user_id: str  # For authorization
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None

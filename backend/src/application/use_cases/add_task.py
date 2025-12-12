@@ -1,7 +1,6 @@
 """Add task use case - evolved from Phase I with user ownership."""
 
 from datetime import datetime
-from uuid import UUID
 
 from src.application.dto.task_dto import TaskDTO
 from src.application.dto.task_input_dto import TaskInputDTO

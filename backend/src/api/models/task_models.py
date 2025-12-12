@@ -27,7 +27,7 @@ class TaskResponse(BaseModel):
     """Response model for task operations."""
 
     id: int = Field(..., description="Task ID")
-    user_id: str = Field(..., description="Owner's user ID (UUID)")
+    user_id: str = Field(..., description="Owner's user ID")
     title: str = Field(..., description="Task title")
     description: Optional[str] = Field(None, description="Task description")
     completed: bool = Field(..., description="Task completion status")
@@ -38,7 +38,7 @@ class TaskResponse(BaseModel):
         json_schema_extra = {
             "example": {
                 "id": 1,
-                "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                "user_id": "VYcFllAL8M3MULquuSCUH3gd3yyxpnvo",
                 "title": "Buy groceries",
                 "description": "Milk, eggs, bread",
                 "completed": False,
@@ -60,7 +60,7 @@ class TaskListResponse(BaseModel):
                 "tasks": [
                     {
                         "id": 1,
-                        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+                        "user_id": "VYcFllAL8M3MULquuSCUH3gd3yyxpnvo",
                         "title": "Buy groceries",
                         "description": "Milk, eggs, bread",
                         "completed": False,

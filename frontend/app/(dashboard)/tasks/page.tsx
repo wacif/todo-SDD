@@ -11,9 +11,10 @@ import { ToastProvider, useToast } from '@/components/ui/toast'
 import { Plus, ListFilter, CheckCircle2, Circle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { authClient } from '@/lib/auth-client'
 
 interface Task {
-  id: string
+  id: number
   title: string
   description: string | null
   completed: boolean
@@ -33,17 +34,64 @@ function TasksContent() {
   const [editingTask, setEditingTask] = useState<Task | null>(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token')
-    const userId = localStorage.getItem('user_id')
-    const name = localStorage.getItem('user_name')
+    let isMounted = true
 
-    if (!token || !userId) {
-      router.push('/login')
-      return
+    const init = async () => {
+      let token: string | null = null
+      let userId: string | null = null
+      let name: string | null = null
+
+      try {
+        token = localStorage.getItem('auth_token')
+        userId = localStorage.getItem('user_id')
+        name = localStorage.getItem('user_name')
+      } catch {
+        // Ignore localStorage errors (private mode / blocked storage)
+      }
+
+      // If localStorage is empty (e.g., social login redirect), hydrate from Better Auth
+      if (!token || !userId) {
+        try {
+          const [{ data: sessionData }, { data: tokenData }] = await Promise.all([
+            authClient.getSession(),
+            authClient.token(),
+          ])
+
+          token = tokenData?.token ?? null
+          userId = sessionData?.user?.id ?? null
+          name = sessionData?.user?.name ?? sessionData?.user?.email ?? null
+
+          if (token && userId) {
+            try {
+              localStorage.setItem('auth_token', token)
+              localStorage.setItem('user_id', userId)
+              if (name) localStorage.setItem('user_name', name)
+            } catch {
+              // Ignore storage errors
+            }
+          }
+        } catch {
+          // If Better Auth calls fail, we'll redirect below
+        }
+      }
+
+      if (!token || !userId) {
+        if (!isMounted) return
+        setLoading(false)
+        router.replace('/login')
+        return
+      }
+
+      if (!isMounted) return
+      setUserName(name || 'User')
+      await loadTasks(userId, token)
     }
 
-    setUserName(name || 'User')
-    loadTasks(userId, token)
+    init()
+
+    return () => {
+      isMounted = false
+    }
   }, [router])
 
   const loadTasks = async (userId: string, token: string) => {
@@ -80,7 +128,7 @@ function TasksContent() {
     }
   }
 
-  const handleToggleComplete = async (taskId: string) => {
+  const handleToggleComplete = async (taskId: number) => {
     const userId = localStorage.getItem('user_id')
     const token = localStorage.getItem('auth_token')
     if (!userId || !token) return
@@ -99,7 +147,7 @@ function TasksContent() {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks/${taskId}/complete`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -210,7 +258,7 @@ function TasksContent() {
     }
   }
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteTask = async (taskId: number) => {
     const userId = localStorage.getItem('user_id')
     const token = localStorage.getItem('auth_token')
     if (!userId || !token) return

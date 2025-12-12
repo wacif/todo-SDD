@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from uuid import UUID
 
 from src.domain.exceptions.domain_exceptions import ValidationError
 
@@ -14,7 +13,7 @@ class Task:
 
     Attributes:
         id: Unique task identifier (serial integer, auto-increment)
-        user_id: Owner of the task (UUID foreign key)
+        user_id: Owner of the task (string ID)
         title: Task title/summary (1-200 characters, required)
         description: Detailed task description (0-1000 characters, optional)
         completed: Completion status flag (default: False)
@@ -23,7 +22,7 @@ class Task:
 
     Business Rules:
         - ID must be unique and auto-incrementing
-        - user_id must reference existing user (cascade delete)
+        - user_id must be present for ownership isolation
         - Title cannot be empty (minimum 1 character after stripping whitespace)
         - Title maximum length: 200 characters
         - Description maximum length: 1000 characters
@@ -33,7 +32,7 @@ class Task:
     """
 
     id: int
-    user_id: UUID
+    user_id: str
     title: str
     description: str | None
     completed: bool

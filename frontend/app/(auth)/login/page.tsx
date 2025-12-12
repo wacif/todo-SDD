@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import AuthForm, { AuthFormData } from '@/components/auth/AuthForm'
 import { ToastProvider, useToast } from '@/components/ui/toast'
+import { signIn, authClient } from '@/lib/auth-client'
 
 function LoginContent() {
   const router = useRouter()
@@ -28,47 +29,48 @@ function LoginContent() {
     setLoading(true)
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/signin`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-          }),
-        }
-      )
+      const { data: signInData, error: signInError } = await signIn.email({
+        email: data.email,
+        password: data.password,
+      })
 
-      const responseData = await response.json()
-
-      if (!response.ok) {
-        // Handle error responses
-        if (response.status === 401) {
-          setError('Email or password is incorrect')
-        } else if (response.status === 422) {
-          // Pydantic validation error
-          const detail = responseData.detail
-          if (Array.isArray(detail)) {
-            setError(detail[0]?.msg || 'Validation error')
-          } else {
-            setError(detail || 'Validation error')
-          }
-        } else {
-          setError('An unexpected error occurred. Please try again.')
-        }
+      if (signInError) {
+        setError(signInError.message || 'Email or password is incorrect')
         setLoading(false)
         return
       }
 
-      // Success - store token and redirect to dashboard
-      if (responseData.token) {
-        localStorage.setItem('auth_token', responseData.token)
-        localStorage.setItem('user_id', responseData.user.id)
-        localStorage.setItem('user_email', responseData.user.email)
-        localStorage.setItem('user_name', responseData.user.name)
+            // Get JWT token
+      const { data: tokenData } = await authClient.token()
+      
+      console.log('Sign in data:', signInData);
+      console.log('Token data:', tokenData);
+
+      if (tokenData?.token) {
+        localStorage.setItem('auth_token', tokenData.token)
+        
+        if (signInData?.user) {
+             localStorage.setItem('user_id', signInData.user.id)
+             localStorage.setItem('user_email', signInData.user.email)
+             localStorage.setItem('user_name', signInData.user.name)
+        } else {
+            console.error('User data missing in sign in response');
+        }
+      } else {
+          console.error('Token missing in token response');
+          // Fallback: check if we can get session
+          const { data: sessionData } = await authClient.getSession();
+          console.log('Session data:', sessionData);
+          if (sessionData?.session) {
+              // If we have a session but no token, we might be in a weird state for JWT.
+              // But let's see if we can proceed or if we need to show an error.
+          }
+      }
+
+      if (!localStorage.getItem('auth_token')) {
+          setError('Login successful but failed to retrieve access token. Please try again.');
+          setLoading(false);
+          return;
       }
 
       toast({
@@ -98,11 +100,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <ToastProvider>
-      <Suspense fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-pulse">Loading...</div>
-        </div>
-      }>
+      <Suspense fallback={<div>Loading...</div>}>
         <LoginContent />
       </Suspense>
     </ToastProvider>

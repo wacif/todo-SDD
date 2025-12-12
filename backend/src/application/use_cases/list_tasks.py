@@ -1,7 +1,5 @@
 """List tasks use case - retrieve all tasks for a user."""
 
-from uuid import UUID
-
 from src.application.dto.task_dto import TaskDTO
 from src.domain.repositories.task_repository import TaskRepository
 
@@ -30,7 +28,7 @@ class ListTasksUseCase:
         """
         self._task_repository = task_repository
 
-    def execute(self, user_id: UUID) -> list[TaskDTO]:
+    def execute(self, user_id: str) -> list[TaskDTO]:
         """
         Execute the list tasks use case.
 
