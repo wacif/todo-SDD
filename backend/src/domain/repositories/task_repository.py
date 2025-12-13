@@ -46,7 +46,16 @@ class TaskRepository(Protocol):
         """
         ...
 
-    def list_by_user(self, user_id: str) -> list[Task]:
+    def list_by_user(
+        self,
+        user_id: str,
+        status: str | None = None,
+        priority: str | None = None,
+        tag: str | None = None,
+        q: str | None = None,
+        sort: str | None = None,
+        order: str | None = None,
+    ) -> list[Task]:
         """
         Retrieve all tasks for a specific user.
 

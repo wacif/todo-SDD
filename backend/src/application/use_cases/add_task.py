@@ -62,6 +62,8 @@ class AddTaskUseCase:
             title=task_input.title,
             description=task_input.description,
             completed=task_input.completed,
+            priority=task_input.priority,
+            tags=task_input.tags,
             created_at=now,
             updated_at=now,
         )
@@ -76,6 +78,8 @@ class AddTaskUseCase:
             title=saved_task.title,
             description=saved_task.description,
             completed=saved_task.completed,
+            priority=saved_task.priority,
+            tags=saved_task.tags,
             created_at=saved_task.created_at,
             updated_at=saved_task.updated_at,
         )

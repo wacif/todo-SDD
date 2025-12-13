@@ -36,6 +36,8 @@ class Task:
     title: str
     description: str | None
     completed: bool
+    priority: str
+    tags: tuple[str, ...]
     created_at: datetime
     updated_at: datetime
 
@@ -59,3 +61,22 @@ class Task:
         # ID validation
         if not isinstance(self.id, int) or self.id < 0:
             raise ValidationError("ID must be a non-negative integer")
+
+        # Priority validation
+        if self.priority not in {"high", "medium", "low"}:
+            raise ValidationError("Priority must be one of: high, medium, low")
+
+        # Tags validation
+        if not isinstance(self.tags, tuple):
+            raise ValidationError("Tags must be a tuple")
+        normalized: list[str] = []
+        for tag in self.tags:
+            if not isinstance(tag, str):
+                raise ValidationError("Tag must be a string")
+            cleaned = tag.strip().lower()
+            if not cleaned:
+                continue
+            if cleaned not in normalized:
+                normalized.append(cleaned)
+
+        object.__setattr__(self, "tags", tuple(normalized))

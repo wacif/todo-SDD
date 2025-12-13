@@ -54,10 +54,12 @@ def test_add_task(task_repository, test_user):
     """Test adding a new task."""
     task = Task(
         id=0,
-        user_id=test_user.id,
+        user_id=str(test_user.id),
         title="Test Task",
         description="Test Description",
         completed=False,
+        priority="medium",
+        tags=(),
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
@@ -65,7 +67,7 @@ def test_add_task(task_repository, test_user):
     saved_task = task_repository.add(task)
 
     assert saved_task.id > 0
-    assert saved_task.user_id == test_user.id
+    assert saved_task.user_id == str(test_user.id)
     assert saved_task.title == "Test Task"
     assert saved_task.description == "Test Description"
     assert saved_task.completed is False
@@ -75,16 +77,18 @@ def test_get_by_id(task_repository, test_user):
     """Test retrieving task by ID."""
     task = Task(
         id=0,
-        user_id=test_user.id,
+        user_id=str(test_user.id),
         title="Test Task",
         description="Test Description",
         completed=False,
+        priority="medium",
+        tags=(),
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
     saved_task = task_repository.add(task)
 
-    retrieved_task = task_repository.get_by_id(saved_task.id, test_user.id)
+    retrieved_task = task_repository.get_by_id(saved_task.id, str(test_user.id))
 
     assert retrieved_task.id == saved_task.id
     assert retrieved_task.title == "Test Task"
@@ -93,17 +97,19 @@ def test_get_by_id(task_repository, test_user):
 def test_get_by_id_not_found(task_repository, test_user):
     """Test retrieving non-existent task."""
     with pytest.raises(EntityNotFoundError):
-        task_repository.get_by_id(999, test_user.id)
+        task_repository.get_by_id(999, str(test_user.id))
 
 
 def test_get_by_id_unauthorized(task_repository, test_user):
     """Test retrieving task owned by different user."""
     task = Task(
         id=0,
-        user_id=test_user.id,
+        user_id=str(test_user.id),
         title="Test Task",
         description="Test Description",
         completed=False,
+        priority="medium",
+        tags=(),
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
@@ -118,29 +124,33 @@ def test_list_by_user(task_repository, test_user):
     for i in range(3):
         task = Task(
             id=0,
-            user_id=test_user.id,
+            user_id=str(test_user.id),
             title=f"Task {i}",
             description="",
             completed=False,
+            priority="medium",
+            tags=(),
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
         )
         task_repository.add(task)
 
-    tasks = task_repository.list_by_user(test_user.id)
+    tasks = task_repository.list_by_user(str(test_user.id))
 
     assert len(tasks) == 3
-    assert all(task.user_id == test_user.id for task in tasks)
+    assert all(task.user_id == str(test_user.id) for task in tasks)
 
 
 def test_update_task(task_repository, test_user):
     """Test updating a task."""
     task = Task(
         id=0,
-        user_id=test_user.id,
+        user_id=str(test_user.id),
         title="Original Title",
         description="Original Description",
         completed=False,
+        priority="medium",
+        tags=(),
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
@@ -148,10 +158,12 @@ def test_update_task(task_repository, test_user):
 
     updated_task = Task(
         id=saved_task.id,
-        user_id=test_user.id,
+        user_id=str(test_user.id),
         title="Updated Title",
         description="Updated Description",
         completed=True,
+        priority="high",
+        tags=("work",),
         created_at=saved_task.created_at,
         updated_at=datetime.utcnow(),
     )
@@ -167,16 +179,18 @@ def test_delete_task(task_repository, test_user):
     """Test deleting a task."""
     task = Task(
         id=0,
-        user_id=test_user.id,
+        user_id=str(test_user.id),
         title="Test Task",
         description="",
         completed=False,
+        priority="medium",
+        tags=(),
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )
     saved_task = task_repository.add(task)
 
-    task_repository.delete(saved_task.id, test_user.id)
+    task_repository.delete(saved_task.id, str(test_user.id))
 
     with pytest.raises(EntityNotFoundError):
-        task_repository.get_by_id(saved_task.id, test_user.id)
+        task_repository.get_by_id(saved_task.id, str(test_user.id))

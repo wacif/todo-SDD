@@ -70,6 +70,16 @@ class UpdateTaskUseCase:
                 if update_dto.completed is not None
                 else existing_task.completed
             ),
+            priority=(
+                update_dto.priority
+                if update_dto.priority is not None
+                else existing_task.priority
+            ),
+            tags=(
+                update_dto.tags
+                if update_dto.tags is not None
+                else existing_task.tags
+            ),
             created_at=existing_task.created_at,  # Immutable
             updated_at=datetime.utcnow(),  # Refresh timestamp
         )
@@ -84,6 +94,8 @@ class UpdateTaskUseCase:
             title=saved_task.title,
             description=saved_task.description,
             completed=saved_task.completed,
+            priority=saved_task.priority,
+            tags=saved_task.tags,
             created_at=saved_task.created_at,
             updated_at=saved_task.updated_at,
         )

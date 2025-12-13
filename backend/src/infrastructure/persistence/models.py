@@ -34,6 +34,8 @@ class TaskModel(SQLModel, table=True):
     title: str = Field(max_length=200, nullable=False)
     description: str = Field(max_length=1000, default="", nullable=False)
     completed: bool = Field(default=False, nullable=False)
+    priority: str = Field(max_length=10, default="medium", nullable=False)
+    tags: str = Field(default="[]", nullable=False)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,

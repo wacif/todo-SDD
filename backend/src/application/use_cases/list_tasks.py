@@ -1,6 +1,7 @@
 """List tasks use case - retrieve all tasks for a user."""
 
 from src.application.dto.task_dto import TaskDTO
+from src.application.dto.task_input_dto import TaskListQueryDTO
 from src.domain.repositories.task_repository import TaskRepository
 
 
@@ -28,7 +29,7 @@ class ListTasksUseCase:
         """
         self._task_repository = task_repository
 
-    def execute(self, user_id: str) -> list[TaskDTO]:
+    def execute(self, user_id: str, query: TaskListQueryDTO | None = None) -> list[TaskDTO]:
         """
         Execute the list tasks use case.
 
@@ -38,8 +39,18 @@ class ListTasksUseCase:
         Returns:
             List of TaskDTOs (may be empty)
         """
-        # Retrieve all tasks for user
-        tasks = self._task_repository.list_by_user(user_id)
+        query = query or TaskListQueryDTO()
+
+        # Retrieve tasks for user
+        tasks = self._task_repository.list_by_user(
+            user_id,
+            status=query.status,
+            priority=query.priority,
+            tag=query.tag,
+            q=query.q,
+            sort=query.sort,
+            order=query.order,
+        )
 
         # Convert to DTOs
         return [
@@ -49,6 +60,8 @@ class ListTasksUseCase:
                 title=task.title,
                 description=task.description,
                 completed=task.completed,
+                priority=task.priority,
+                tags=task.tags,
                 created_at=task.created_at,
                 updated_at=task.updated_at,
             )

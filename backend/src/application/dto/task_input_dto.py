@@ -17,6 +17,8 @@ class TaskInputDTO:
     title: str
     description: Optional[str] = None
     completed: bool = False
+    priority: str = "medium"
+    tags: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -32,3 +34,17 @@ class TaskUpdateDTO:
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
+    priority: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
+
+
+@dataclass(frozen=True)
+class TaskListQueryDTO:
+    """DTO for list/search/filter/sort parameters."""
+
+    status: Optional[str] = None  # completed | pending
+    priority: Optional[str] = None  # high | medium | low
+    tag: Optional[str] = None
+    q: Optional[str] = None
+    sort: Optional[str] = None  # title | priority
+    order: str = "desc"  # asc | desc

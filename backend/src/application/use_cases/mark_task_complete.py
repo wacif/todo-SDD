@@ -59,6 +59,8 @@ class MarkTaskCompleteUseCase:
             title=existing_task.title,
             description=existing_task.description,
             completed=completed,
+            priority=existing_task.priority,
+            tags=existing_task.tags,
             created_at=existing_task.created_at,  # Immutable
             updated_at=datetime.utcnow(),  # Refresh timestamp
         )
@@ -73,6 +75,8 @@ class MarkTaskCompleteUseCase:
             title=saved_task.title,
             description=saved_task.description,
             completed=saved_task.completed,
+            priority=saved_task.priority,
+            tags=saved_task.tags,
             created_at=saved_task.created_at,
             updated_at=saved_task.updated_at,
         )
