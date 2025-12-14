@@ -11,6 +11,8 @@ interface Task {
   title: string
   description: string | null
   completed: boolean
+  priority: 'high' | 'medium' | 'low'
+  tags: string[]
   created_at: string
   updated_at: string
 }

@@ -9,6 +9,8 @@ describe('TaskForm', () => {
       render(<TaskForm onSubmit={() => {}} onCancel={() => {}} />)
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/description/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/priority/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/tags/i)).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /submit|create|save/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
     })
@@ -20,10 +22,12 @@ describe('TaskForm', () => {
 
     it('renders in edit mode with initial values', () => {
       const initialTask = {
-        id: '1',
+        id: 1,
         title: 'Edit Task',
         description: 'Edit Description',
         completed: false,
+        priority: 'high' as const,
+        tags: ['work', 'urgent'],
       }
       render(
         <TaskForm
@@ -35,14 +39,18 @@ describe('TaskForm', () => {
       expect(screen.getByRole('button', { name: /save changes/i })).toBeInTheDocument()
       expect(screen.getByDisplayValue('Edit Task')).toBeInTheDocument()
       expect(screen.getByDisplayValue('Edit Description')).toBeInTheDocument()
+      expect(screen.getByLabelText(/priority/i)).toHaveValue('high')
+      expect(screen.getByLabelText(/tags/i)).toHaveValue('work, urgent')
     })
 
     it('renders without description in edit mode', () => {
       const initialTask = {
-        id: '1',
+        id: 1,
         title: 'Edit Task',
         description: null,
         completed: false,
+        priority: 'medium' as const,
+        tags: [],
       }
       render(
         <TaskForm
@@ -85,6 +93,8 @@ describe('TaskForm', () => {
         expect(onSubmit).toHaveBeenCalledWith({
           title: 'Test Task',
           description: '',
+          priority: 'medium',
+          tags: [],
         })
       })
     })
@@ -124,6 +134,8 @@ describe('TaskForm', () => {
         expect(onSubmit).toHaveBeenCalledWith({
           title: 'New Task',
           description: 'New Description',
+          priority: 'medium',
+          tags: [],
         })
       })
     })

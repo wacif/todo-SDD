@@ -7,6 +7,7 @@ import { TaskList } from '@/components/dashboard/TaskList'
 import { TaskForm } from '@/components/dashboard/TaskForm'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ToastProvider, useToast } from '@/components/ui/toast'
 import { Plus, ListFilter, CheckCircle2, Circle } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -18,8 +19,26 @@ interface Task {
   title: string
   description: string | null
   completed: boolean
+  priority: 'high' | 'medium' | 'low'
+  tags: string[]
   created_at: string
   updated_at: string
+}
+
+type TaskListQuery = {
+  status?: 'completed' | 'pending'
+  priority?: 'high' | 'medium' | 'low'
+  tag?: string
+  q?: string
+  sort?: 'title' | 'priority'
+  order?: 'asc' | 'desc'
+}
+
+type TaskFormPayload = {
+  title: string
+  description: string
+  priority: 'high' | 'medium' | 'low'
+  tags: string[]
 }
 
 function TasksContent() {
@@ -29,9 +48,15 @@ function TasksContent() {
   const [loading, setLoading] = useState(true)
   const [userName, setUserName] = useState('')
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
+  const [search, setSearch] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all')
+  const [tagFilter, setTagFilter] = useState('')
+  const [sort, setSort] = useState<'created_at' | 'title' | 'priority'>('created_at')
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [auth, setAuth] = useState<{ userId: string; token: string } | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -84,7 +109,8 @@ function TasksContent() {
 
       if (!isMounted) return
       setUserName(name || 'User')
-      await loadTasks(userId, token)
+      setAuth({ userId, token })
+      await loadTasks(userId, token, {})
     }
 
     init()
@@ -94,10 +120,44 @@ function TasksContent() {
     }
   }, [router])
 
-  const loadTasks = async (userId: string, token: string) => {
+  useEffect(() => {
+    if (!auth) return
+
+    const query: TaskListQuery = {
+      status: filter === 'all' ? undefined : filter,
+      priority: priorityFilter === 'all' ? undefined : priorityFilter,
+      tag: tagFilter.trim() ? tagFilter.trim() : undefined,
+      q: search.trim() ? search.trim() : undefined,
+      sort: sort === 'created_at' ? undefined : sort,
+      order,
+    }
+
+    const handle = setTimeout(() => {
+      loadTasks(auth.userId, auth.token, query)
+    }, 250)
+
+    return () => clearTimeout(handle)
+  }, [auth, filter, priorityFilter, tagFilter, search, sort, order])
+
+  const loadTasks = async (userId: string, token: string, query: TaskListQuery) => {
     try {
+      const params = new URLSearchParams()
+      if (query.status) params.set('status', query.status)
+      if (query.priority) params.set('priority', query.priority)
+      if (query.tag) params.set('tag', query.tag)
+      if (query.q) params.set('q', query.q)
+      if (query.sort) params.set('sort', query.sort)
+      if (query.order) params.set('order', query.order)
+
+      const url = new URL(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks`
+      )
+      if ([...params.keys()].length > 0) {
+        url.search = params.toString()
+      }
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks`,
+        url.toString(),
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -177,7 +237,7 @@ function TasksContent() {
     }
   }
 
-  const handleCreateTask = async (data: { title: string; description: string }) => {
+  const handleCreateTask = async (data: TaskFormPayload) => {
     const userId = localStorage.getItem('user_id')
     const token = localStorage.getItem('auth_token')
     if (!userId || !token) return
@@ -215,7 +275,7 @@ function TasksContent() {
     }
   }
 
-  const handleEditTask = async (data: { title: string; description: string }) => {
+  const handleEditTask = async (data: TaskFormPayload) => {
     if (!editingTask) return
 
     const userId = localStorage.getItem('user_id')
@@ -374,6 +434,86 @@ function TasksContent() {
             <Plus className="h-5 w-5 mr-2" />
             New Task
           </Button>
+        </div>
+
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-5 gap-4">
+          <Input
+            label="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search title/description"
+            fullWidth
+            className="bg-gray-900/50 border-gray-800 focus:border-indigo-500/50 focus:ring-indigo-500/20"
+          />
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-white" htmlFor="priority-filter">
+              Priority
+            </label>
+            <select
+              id="priority-filter"
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value as any)}
+              className={cn(
+                'flex h-10 w-full rounded-md border bg-gray-900/50 px-3 py-2 text-sm text-white',
+                'border-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
+                'focus-visible:ring-offset-gray-950'
+              )}
+            >
+              <option value="all">All</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+
+          <Input
+            label="Tag"
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            placeholder="e.g. work"
+            fullWidth
+            className="bg-gray-900/50 border-gray-800 focus:border-indigo-500/50 focus:ring-indigo-500/20"
+          />
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-white" htmlFor="sort-by">
+              Sort
+            </label>
+            <select
+              id="sort-by"
+              value={sort}
+              onChange={(e) => setSort(e.target.value as any)}
+              className={cn(
+                'flex h-10 w-full rounded-md border bg-gray-900/50 px-3 py-2 text-sm text-white',
+                'border-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
+                'focus-visible:ring-offset-gray-950'
+              )}
+            >
+              <option value="created_at">Created</option>
+              <option value="title">Title</option>
+              <option value="priority">Priority</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-white" htmlFor="sort-order">
+              Order
+            </label>
+            <select
+              id="sort-order"
+              value={order}
+              onChange={(e) => setOrder(e.target.value as any)}
+              className={cn(
+                'flex h-10 w-full rounded-md border bg-gray-900/50 px-3 py-2 text-sm text-white',
+                'border-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
+                'focus-visible:ring-offset-gray-950'
+              )}
+            >
+              <option value="desc">Desc</option>
+              <option value="asc">Asc</option>
+            </select>
+          </div>
         </div>
 
         {/* Task List */}

@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils'
 interface TaskFormData {
   title: string
   description: string
+  priority: 'high' | 'medium' | 'low'
+  tags: string[]
 }
 
 interface Task {
@@ -15,6 +17,8 @@ interface Task {
   title: string
   description: string | null
   completed: boolean
+  priority: 'high' | 'medium' | 'low'
+  tags: string[]
 }
 
 interface TaskFormProps {
@@ -26,6 +30,8 @@ interface TaskFormProps {
 export function TaskForm({ onSubmit, onCancel, initialTask }: TaskFormProps) {
   const [title, setTitle] = React.useState(initialTask?.title || '')
   const [description, setDescription] = React.useState(initialTask?.description || '')
+  const [priority, setPriority] = React.useState<TaskFormData['priority']>(initialTask?.priority || 'medium')
+  const [tags, setTags] = React.useState((initialTask?.tags || []).join(', '))
   const [errors, setErrors] = React.useState<{ title?: string }>({})
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
@@ -53,15 +59,25 @@ export function TaskForm({ onSubmit, onCancel, initialTask }: TaskFormProps) {
 
     setIsSubmitting(true)
     try {
+      const parsedTags = tags
+        .split(',')
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean)
+      const uniqueTags = Array.from(new Set(parsedTags))
+
       await onSubmit({
         title: title.trim(),
         description: description.trim(),
+        priority,
+        tags: uniqueTags,
       })
 
       // Reset form only in create mode
       if (!isEditMode) {
         setTitle('')
         setDescription('')
+        setPriority('medium')
+        setTags('')
         setErrors({})
       }
     } catch (error) {
@@ -111,6 +127,41 @@ export function TaskForm({ onSubmit, onCancel, initialTask }: TaskFormProps) {
           )}
         />
       </div>
+
+      <div>
+        <label
+          htmlFor="priority"
+          className="block text-sm font-medium text-gray-300 mb-2"
+        >
+          Priority
+        </label>
+        <select
+          id="priority"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as TaskFormData['priority'])}
+          disabled={isSubmitting}
+          className={cn(
+            'w-full rounded-xl border bg-gray-900/50 px-4 py-3 text-sm text-white',
+            'border-gray-800 focus:border-indigo-500/50 focus:outline-none focus:ring-4 focus:ring-indigo-500/10',
+            'disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200'
+          )}
+        >
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <Input
+        label="Tags"
+        value={tags}
+        onChange={(e) => setTags(e.target.value)}
+        fullWidth
+        disabled={isSubmitting}
+        placeholder="e.g. work, finance"
+        helperText="Comma-separated"
+        className="bg-gray-900/50 border-gray-800 focus:border-indigo-500/50 focus:ring-indigo-500/20"
+      />
 
       <div className="flex justify-end gap-3 pt-2">
         <Button

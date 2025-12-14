@@ -4,26 +4,32 @@ import { TaskList } from '@/components/dashboard/TaskList'
 
 const mockTasks = [
   {
-    id: '1',
+    id: 1,
     title: 'Task 1',
     description: 'Description 1',
     completed: false,
+    priority: 'medium',
+    tags: ['work'],
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-01T00:00:00Z',
   },
   {
-    id: '2',
+    id: 2,
     title: 'Task 2',
     description: 'Description 2',
     completed: true,
+    priority: 'high',
+    tags: ['finance', 'work'],
     created_at: '2024-01-02T00:00:00Z',
     updated_at: '2024-01-02T00:00:00Z',
   },
   {
-    id: '3',
+    id: 3,
     title: 'Task 3',
     description: null,
     completed: false,
+    priority: 'low',
+    tags: [],
     created_at: '2024-01-03T00:00:00Z',
     updated_at: '2024-01-03T00:00:00Z',
   },
@@ -72,9 +78,8 @@ describe('TaskList', () => {
       render(
         <TaskList tasks={mockTasks} onToggleComplete={() => {}} />
       )
-      // Checkboxes should be rendered by TaskCard
-      const checkboxes = screen.getAllByRole('checkbox')
-      expect(checkboxes).toHaveLength(3)
+      const toggleButtons = screen.getAllByRole('button', { name: /mark "/i })
+      expect(toggleButtons).toHaveLength(3)
     })
 
     it('passes onEdit to TaskCard', () => {
@@ -85,7 +90,7 @@ describe('TaskList', () => {
           onEdit={() => {}}
         />
       )
-      const editButtons = screen.getAllByRole('button', { name: /edit/i })
+      const editButtons = screen.getAllByRole('button', { name: /edit task/i })
       expect(editButtons).toHaveLength(3)
     })
 
@@ -97,7 +102,7 @@ describe('TaskList', () => {
           onDelete={() => {}}
         />
       )
-      const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
+      const deleteButtons = screen.getAllByRole('button', { name: /delete task/i })
       expect(deleteButtons).toHaveLength(3)
     })
   })
