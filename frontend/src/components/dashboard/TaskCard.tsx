@@ -8,24 +8,25 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface Task {
-  id: number
+  id: string | number
   title: string
   description: string | null
   completed: boolean
-  priority: 'high' | 'medium' | 'low'
-  tags: string[]
+  priority?: 'high' | 'medium' | 'low'
+  tags?: string[]
   created_at: string
-  updated_at: string
+  updated_at?: string
 }
 
 interface TaskCardProps {
   task: Task
-  onToggleComplete: (id: number) => void
+  onToggleComplete: (id: string | number) => void
   onEdit?: (task: Task) => void
-  onDelete?: (id: number) => void
+  onDelete?: (id: string | number) => void
 }
 
 export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardProps) {
+  const tags = task.tags ?? []
   const formattedDate = new Date(task.created_at).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -56,21 +57,34 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
       <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
       <div className="relative flex items-start gap-4">
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleComplete(task.id)
-          }}
-          className={cn(
-            "mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-950",
-            task.completed
-              ? "bg-indigo-500 border-indigo-500 text-white"
-              : "border-gray-600 bg-transparent hover:border-indigo-400"
-          )}
-          aria-label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
-        >
-          {task.completed && <Check className="h-3.5 w-3.5" />}
-        </button>
+        <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center">
+          <input
+            type="checkbox"
+            checked={task.completed}
+            onChange={(e) => {
+              e.stopPropagation()
+              onToggleComplete(task.id)
+            }}
+            className="sr-only"
+            aria-label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleComplete(task.id)
+            }}
+            className={cn(
+              "flex h-6 w-6 items-center justify-center rounded-full border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-950",
+              task.completed
+                ? "bg-indigo-500 border-indigo-500 text-white"
+                : "border-gray-600 bg-transparent hover:border-indigo-400"
+            )}
+            aria-label={`Mark "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
+            type="button"
+          >
+            {task.completed && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+          </button>
+        </span>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1">
@@ -115,17 +129,19 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
           </div>
 
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <Badge variant={priorityVariant} size="sm">
-              {task.priority}
-            </Badge>
-            {task.tags.slice(0, 3).map((tag) => (
+            {task.priority && (
+              <Badge variant={priorityVariant} size="sm">
+                {task.priority}
+              </Badge>
+            )}
+            {tags.slice(0, 3).map((tag) => (
               <Badge key={tag} variant="outline" size="sm" className="border-gray-700 text-gray-200">
                 {tag}
               </Badge>
             ))}
-            {task.tags.length > 3 && (
+            {tags.length > 3 && (
               <Badge variant="outline" size="sm" className="border-gray-700 text-gray-200">
-                +{task.tags.length - 3}
+                +{tags.length - 3}
               </Badge>
             )}
           </div>
@@ -146,9 +162,13 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
               <Clock className="h-3 w-3" />
               <span>{formattedDate}</span>
             </div>
-            {task.completed && (
-              <Badge variant="success" size="sm" className="bg-green-500/10 text-green-400 border-green-500/20">
+            {task.completed ? (
+              <Badge variant="success" size="sm">
                 Completed
+              </Badge>
+            ) : (
+              <Badge variant="secondary" size="sm">
+                Pending
               </Badge>
             )}
           </div>

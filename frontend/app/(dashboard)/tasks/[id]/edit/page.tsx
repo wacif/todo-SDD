@@ -1,52 +1,178 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import * as React from 'react'
+import { useRouter } from 'next/navigation'
 
-export default function EditTaskPage({ params }: { params: { id: string } }) {
-  const [title, setTitle] = useState("")
+import { Navigation } from '@/components/dashboard/Navigation'
+import { TaskForm } from '@/components/dashboard/TaskForm'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ToastProvider, useToast } from '@/components/ui/toast'
+import { getTask, updateTask, type Task as ApiTask, type TaskInput } from '@/lib/api'
+import { authClient } from '@/lib/auth-client'
+
+function EditTaskContent({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const { id } = params
+  const { toast } = useToast()
+  const taskId = Number(params.id)
 
-  useEffect(() => {
-    // Fetch task data and populate the form
-    const fetchTask = async () => {
-      // In a real app, you would fetch this from your API
-      const mockTask = { id, title: `Task ${id}` }
-      setTitle(mockTask.title)
+  const [task, setTask] = React.useState<ApiTask | null>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [userName, setUserName] = React.useState('')
+  const [auth, setAuth] = React.useState<{ userId: string; token: string } | null>(null)
+
+  React.useEffect(() => {
+    if (!Number.isFinite(taskId)) {
+      setLoading(false)
+      return
     }
-    fetchTask()
-  }, [id])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission, e.g., send a PUT request to your API
-    router.push("/tasks")
+    let isMounted = true
+
+    const init = async () => {
+      let token: string | null = null
+      let userId: string | null = null
+      let name: string | null = null
+
+      try {
+        token = localStorage.getItem('auth_token')
+        userId = localStorage.getItem('user_id')
+        name = localStorage.getItem('user_name')
+      } catch {
+        // ignore
+      }
+
+      if (!token || !userId) {
+        try {
+          const [{ data: sessionData }, { data: tokenData }] = await Promise.all([
+            authClient.getSession(),
+            authClient.token(),
+          ])
+
+          token = tokenData?.token ?? null
+          userId = sessionData?.user?.id ?? null
+          name = sessionData?.user?.name ?? sessionData?.user?.email ?? null
+
+          if (token && userId) {
+            try {
+              localStorage.setItem('auth_token', token)
+              localStorage.setItem('user_id', userId)
+              if (name) localStorage.setItem('user_name', name)
+            } catch {
+              // ignore
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!token || !userId) {
+        if (!isMounted) return
+        setLoading(false)
+        router.replace('/login')
+        return
+      }
+
+      if (!isMounted) return
+      setUserName(name || 'User')
+      setAuth({ userId, token })
+
+      try {
+        const fetched = await getTask(userId, taskId)
+        if (!isMounted) return
+        setTask(fetched)
+      } catch (e) {
+        if (!isMounted) return
+        toast({
+          title: 'Error',
+          description: e instanceof Error ? e.message : 'Failed to load task',
+          variant: 'destructive',
+        })
+      } finally {
+        if (!isMounted) return
+        setLoading(false)
+      }
+    }
+
+    init()
+
+    return () => {
+      isMounted = false
+    }
+  }, [router, taskId, toast])
+
+  const handleSubmit = async (data: { title: string; description: string; priority: 'high' | 'medium' | 'low'; tags: string[] }) => {
+    if (!auth) return
+
+    const input: TaskInput = {
+      title: data.title,
+      description: data.description,
+      priority: data.priority,
+      tags: data.tags,
+    }
+
+    const updated = await updateTask(auth.userId, taskId, input)
+    setTask(updated)
+    toast({
+      title: 'Success',
+      description: 'Task updated successfully',
+      variant: 'success',
+    })
+    router.push(`/tasks/${taskId}`)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#030712]">
+        <Navigation userName={userName || 'User'} />
+        <main className="container mx-auto px-4 py-12 max-w-3xl space-y-4">
+          <Skeleton className="h-10 w-1/2" />
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-5/6" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </main>
+      </div>
+    )
+  }
+
+  if (!task) {
+    return (
+      <div className="min-h-screen bg-[#030712]">
+        <Navigation userName={userName || 'User'} />
+        <main className="container mx-auto px-4 py-12 max-w-3xl">
+          <div className="text-white">Task not found.</div>
+        </main>
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Edit Task</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-            Title
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          />
-        </div>
-        <button
-          type="submit"
-          className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-          Save
-        </button>
-      </form>
+    <div className="min-h-screen bg-[#030712]">
+      <Navigation userName={userName || 'User'} />
+      <main className="container mx-auto px-4 py-12 max-w-3xl">
+        <h1 className="text-3xl font-bold text-white mb-6">Edit Task</h1>
+        <TaskForm
+          initialTask={{
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            completed: task.completed,
+            priority: task.priority,
+            tags: task.tags,
+          }}
+          onSubmit={handleSubmit}
+          onCancel={() => router.push(`/tasks/${taskId}`)}
+        />
+      </main>
     </div>
+  )
+}
+
+export default function EditTaskPage({ params }: { params: { id: string } }) {
+  return (
+    <ToastProvider>
+      <EditTaskContent params={params} />
+    </ToastProvider>
   )
 }

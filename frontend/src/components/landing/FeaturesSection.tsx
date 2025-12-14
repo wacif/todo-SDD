@@ -36,3 +36,6 @@ export function FeaturesSection({ content }: FeaturesSectionProps) {
     </section>
   );
 }
+
+export default FeaturesSection
+

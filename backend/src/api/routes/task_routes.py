@@ -167,6 +167,40 @@ async def list_tasks(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
+@router.get("/{user_id}/tasks/{task_id}", response_model=TaskResponse)
+async def get_task(
+    user_id: Annotated[str, Path(description="User ID (must match authenticated user)")],
+    task_id: Annotated[int, Path(description="Task ID to retrieve")],
+    current_user_id: Annotated[str, Depends(get_current_user_id)],
+    task_repository: TaskRepository = Depends(get_task_repository),
+):
+    """Get a single task by ID.
+
+    - Requires JWT authentication
+    - User can only access their own tasks
+    """
+    validate_user_ownership(user_id, current_user_id)
+
+    try:
+        task = task_repository.get_by_id(task_id, current_user_id)
+        task_dto = TaskDTO(
+            id=task.id,
+            user_id=task.user_id,
+            title=task.title,
+            description=task.description,
+            completed=task.completed,
+            priority=task.priority,
+            tags=task.tags,
+            created_at=task.created_at,
+            updated_at=task.updated_at,
+        )
+        return task_dto_to_response(task_dto)
+    except EntityNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except UnauthorizedError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+
 @router.put("/{user_id}/tasks/{task_id}", response_model=TaskResponse)
 async def update_task(
     user_id: Annotated[str, Path(description="User ID (must match authenticated user)")],

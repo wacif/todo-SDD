@@ -8,6 +8,7 @@ import { TaskForm } from '@/components/dashboard/TaskForm'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { ToastProvider, useToast } from '@/components/ui/toast'
 import { Plus, ListFilter, CheckCircle2, Circle } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -56,6 +57,9 @@ function TasksContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deletingTask, setDeletingTask] = useState<Task | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [auth, setAuth] = useState<{ userId: string; token: string } | null>(null)
 
   useEffect(() => {
@@ -318,16 +322,23 @@ function TasksContent() {
     }
   }
 
-  const handleDeleteTask = async (taskId: number) => {
+  const handleRequestDelete = (taskId: number) => {
+    const task = tasks.find((t) => t.id === taskId) || null
+    setDeletingTask(task)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deletingTask) return
+
     const userId = localStorage.getItem('user_id')
     const token = localStorage.getItem('auth_token')
     if (!userId || !token) return
 
-    if (!confirm('Are you sure you want to delete this task?')) return
-
+    setIsDeleting(true)
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks/${taskId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks/${deletingTask.id}`,
         {
           method: 'DELETE',
           headers: {
@@ -338,8 +349,10 @@ function TasksContent() {
 
       if (!response.ok) throw new Error('Failed to delete task')
 
-      setTasks((prev) => prev.filter((t) => t.id !== taskId))
-      
+      setTasks((prev) => prev.filter((t) => t.id !== deletingTask.id))
+      setIsDeleteModalOpen(false)
+      setDeletingTask(null)
+
       toast({
         title: 'Success',
         description: 'Task deleted successfully',
@@ -351,6 +364,8 @@ function TasksContent() {
         description: 'Failed to delete task',
         variant: 'destructive',
       })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -362,10 +377,7 @@ function TasksContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#030712]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-          <p className="mt-2 text-gray-400">Loading tasks...</p>
-        </div>
+        <LoadingSpinner label="Loading tasks..." />
       </div>
     )
   }
@@ -391,6 +403,7 @@ function TasksContent() {
           <div className="flex items-center gap-3 bg-gray-900/50 p-1.5 rounded-xl border border-gray-800 backdrop-blur-sm">
             <button
               onClick={() => setFilter('all')}
+              aria-pressed={filter === 'all'}
               className={cn(
                 "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2",
                 filter === 'all' 
@@ -403,6 +416,7 @@ function TasksContent() {
             </button>
             <button
               onClick={() => setFilter('pending')}
+              aria-pressed={filter === 'pending'}
               className={cn(
                 "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2",
                 filter === 'pending' 
@@ -415,6 +429,7 @@ function TasksContent() {
             </button>
             <button
               onClick={() => setFilter('completed')}
+              aria-pressed={filter === 'completed'}
               className={cn(
                 "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2",
                 filter === 'completed' 
@@ -522,7 +537,7 @@ function TasksContent() {
           filter={filter}
           onToggleComplete={handleToggleComplete}
           onEdit={handleEdit}
-          onDelete={handleDeleteTask}
+          onDelete={handleRequestDelete}
         />
       </main>
 
@@ -553,6 +568,49 @@ function TasksContent() {
               }}
             />
           </Modal.Body>
+        </Modal.Content>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        open={isDeleteModalOpen}
+        onClose={() => {
+          if (isDeleting) return
+          setIsDeleteModalOpen(false)
+          setDeletingTask(null)
+        }}
+        size="sm"
+      >
+        <Modal.Content className="bg-[#0a0f1e] border-gray-800">
+          <Modal.Header className="text-white border-gray-800">Delete task?</Modal.Header>
+          <Modal.Body>
+            <p className="text-gray-300">
+              This action can’t be undone.
+              {deletingTask?.title ? (
+                <span className="block mt-2 text-white">{deletingTask.title}</span>
+              ) : null}
+            </p>
+          </Modal.Body>
+          <Modal.Footer className="border-gray-800">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIsDeleteModalOpen(false)
+                setDeletingTask(null)
+              }}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              isLoading={isDeleting}
+              aria-label="Confirm delete task"
+            >
+              Delete
+            </Button>
+          </Modal.Footer>
         </Modal.Content>
       </Modal>
     </div>

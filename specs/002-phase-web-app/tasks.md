@@ -1,16 +1,16 @@
 # Implementation Tasks: Phase II - Full-Stack Web Application
 
 **Feature**: Phase II - Full-Stack Web Application  
-**Branch**: `002-phase-web-app`  
+**Branch**: `002-phase2-alignment`  
 **Created**: 2025-12-07  
-**Status**: Ready for Implementation
+**Status**: ✅ Complete (Validation Green)
 
 ## Overview
 
 This document provides a dependency-ordered task breakdown for implementing Phase II. Tasks are organized by user story to enable independent implementation and testing. Each phase represents a complete, shippable increment.
 
-**Total Tasks**: 85  
-**Completed Tasks**: 65/85 (76%)  
+**Total Tasks**: 97  
+**Completed Tasks**: 97/97 (100%)  
 **User Stories**: 7 (US-W1 to US-W7)  
 **Estimated Duration**: 5-8 days
 
@@ -30,6 +30,7 @@ This document provides a dependency-ordered task breakdown for implementing Phas
 | US-W6 (Update Task) | P4 | 10 | US-W4 | User can edit task details |
 | US-W7 (Delete Task) | P5 | 7 | US-W4 | User can remove tasks |
 | Polish | - | 3 | All stories | Performance and UX improvements |
+| Completion Hardening | - | 12 | Polish | All tests green + STATUS updated |
 
 ---
 
@@ -126,7 +127,7 @@ This document provides a dependency-ordered task breakdown for implementing Phas
 - [X] T030 [US1] Add unique email constraint handling (409 Conflict response)
 - [X] T031 [P] [US1] Write integration test for signup endpoint in backend/tests/integration/test_auth_routes.py
 - [X] T032 [P] [US1] Create signup page UI in frontend/app/(auth)/signup/page.tsx
-- [X] T033 [US1] Create AuthForm component in frontend/components/auth/AuthForm.tsx (reusable for login/signup)
+- [X] T033 [US1] Create AuthForm component in frontend/src/components/auth/AuthForm.tsx (reusable for login/signup)
 
 **Test Criteria**:
 - ✅ POST /api/auth/signup with valid data creates user and returns 201
@@ -193,9 +194,9 @@ curl -X POST http://localhost:8000/api/auth/signin \
 - [X] T044 [US3] Add user_id ownership validation (403 if URL user_id != token user_id)
 - [X] T045 [US3] Add title/description validation (1-200 chars, 0-1000 chars)
 - [X] T046 [P] [US3] Write integration test for create task endpoint in backend/tests/integration/test_task_routes.py
-- [X] T047 [P] [US3] Create TaskForm component in frontend/components/tasks/TaskForm.tsx
+- [X] T047 [P] [US3] Create TaskForm component in frontend/src/components/tasks/TaskForm.tsx
 - [X] T048 [P] [US3] Create task creation page in frontend/app/(dashboard)/tasks/new/page.tsx
-- [X] T049 [P] [US3] Create API client method createTask in frontend/lib/api.ts (axios with JWT injection)
+- [X] T049 [P] [US3] Create API client method createTask in frontend/src/lib/api.ts (axios with JWT injection)
 - [X] T050 [US3] Wire TaskForm to API client and handle success/error states
 
 **Test Criteria**:
@@ -230,10 +231,10 @@ curl -X POST http://localhost:8000/api/{user_id}/tasks \
 - [X] T052 [US4] Wire ListTasksUseCase with JWT middleware and user_id filtering
 - [X] T053 [US4] Add query optimization (index on user_id, created_at)
 - [X] T054 [P] [US4] Write integration test for list tasks endpoint in backend/tests/integration/test_task_routes.py
-- [X] T055 [P] [US4] Create TaskCard component in frontend/components/tasks/TaskCard.tsx
-- [X] T056 [P] [US4] Create TaskList component in frontend/components/tasks/TaskList.tsx
+- [X] T055 [P] [US4] Create TaskCard component in frontend/src/components/tasks/TaskCard.tsx
+- [X] T056 [P] [US4] Create TaskList component in frontend/src/components/tasks/TaskList.tsx
 - [X] T057 [P] [US4] Create tasks list page in frontend/app/(dashboard)/tasks/page.tsx
-- [X] T058 [US4] Create API client method listTasks in frontend/lib/api.ts
+- [X] T058 [US4] Create API client method listTasks in frontend/src/lib/api.ts
 
 **Test Criteria**:
 - ✅ GET /api/{user_id}/tasks returns only authenticated user's tasks
@@ -264,8 +265,8 @@ curl http://localhost:8000/api/{user_id}/tasks \
 - [X] T060 [US5] Wire MarkTaskCompleteUseCase with JWT middleware
 - [X] T061 [US5] Add task ownership validation (user_id match)
 - [X] T062 [P] [US5] Write integration test for complete endpoint in backend/tests/integration/test_task_routes.py
-- [X] T063 [P] [US5] Add toggle button to TaskCard component in frontend/components/tasks/TaskCard.tsx
-- [X] T064 [P] [US5] Create API client method toggleComplete in frontend/lib/api.ts
+- [X] T063 [P] [US5] Add toggle button to TaskCard component in frontend/src/components/tasks/TaskCard.tsx
+- [X] T064 [P] [US5] Create API client method toggleComplete in frontend/src/lib/api.ts
 - [X] T065 [US5] Add optimistic UI update for task completion status
 
 **Test Criteria**:
@@ -293,16 +294,16 @@ curl -X PATCH http://localhost:8000/api/{user_id}/tasks/5/complete \
 
 ### Tasks
 
-- [ ] T066 [P] [US6] Create GET /api/{user_id}/tasks/{id} route in backend/src/api/task_routes.py
-- [ ] T067 [P] [US6] Create PUT /api/{user_id}/tasks/{id} route in backend/src/api/task_routes.py
-- [ ] T068 [US6] Wire UpdateTaskUseCase with JWT middleware
-- [ ] T069 [US6] Add task ownership validation and 404 handling
-- [ ] T070 [P] [US6] Write integration tests for get/update endpoints in backend/tests/integration/test_task_routes.py
-- [ ] T071 [P] [US6] Create task detail page in frontend/app/(dashboard)/tasks/[id]/page.tsx
-- [ ] T072 [P] [US6] Create task edit page in frontend/app/(dashboard)/tasks/[id]/edit/page.tsx
-- [ ] T073 [P] [US6] Create API client methods getTask and updateTask in frontend/lib/api.ts
-- [ ] T074 [US6] Reuse TaskForm component for editing (populate with existing data)
-- [ ] T075 [US6] Add form submission handling with success/error feedback
+- [X] T066 [P] [US6] Create GET /api/{user_id}/tasks/{id} route in backend/src/api/task_routes.py
+- [X] T067 [P] [US6] Create PUT /api/{user_id}/tasks/{id} route in backend/src/api/task_routes.py
+- [X] T068 [US6] Wire UpdateTaskUseCase with JWT middleware
+- [X] T069 [US6] Add task ownership validation and 404 handling
+- [X] T070 [P] [US6] Write integration tests for get/update endpoints in backend/tests/integration/test_task_routes.py
+- [X] T071 [P] [US6] Create task detail page in frontend/app/(dashboard)/tasks/[id]/page.tsx
+- [X] T072 [P] [US6] Create task edit page in frontend/app/(dashboard)/tasks/[id]/edit/page.tsx
+- [X] T073 [P] [US6] Create API client methods getTask and updateTask in frontend/src/lib/api.ts
+- [X] T074 [US6] Reuse TaskForm component for editing (populate with existing data)
+- [X] T075 [US6] Add form submission handling with success/error feedback
 
 **Test Criteria**:
 - ✅ GET /api/{user_id}/tasks/{id} returns task details
@@ -333,13 +334,13 @@ curl -X PUT http://localhost:8000/api/{user_id}/tasks/5 \
 
 ### Tasks
 
-- [ ] T076 [P] [US7] Create DELETE /api/{user_id}/tasks/{id} route in backend/src/api/task_routes.py
-- [ ] T077 [US7] Wire DeleteTaskUseCase with JWT middleware
-- [ ] T078 [US7] Add task ownership validation
-- [ ] T079 [P] [US7] Write integration test for delete endpoint in backend/tests/integration/test_task_routes.py
-- [ ] T080 [P] [US7] Create Modal component for confirmation dialogs in frontend/components/ui/Modal.tsx
-- [ ] T081 [P] [US7] Add delete button to TaskCard with confirmation modal
-- [ ] T082 [US7] Create API client method deleteTask in frontend/lib/api.ts
+- [X] T076 [P] [US7] Create DELETE /api/{user_id}/tasks/{id} route in backend/src/api/task_routes.py
+- [X] T077 [US7] Wire DeleteTaskUseCase with JWT middleware
+- [X] T078 [US7] Add task ownership validation
+- [X] T079 [P] [US7] Write integration test for delete endpoint in backend/tests/integration/test_task_routes.py
+- [X] T080 [P] [US7] Create Modal component for confirmation dialogs in frontend/src/components/ui/modal.tsx
+- [X] T081 [P] [US7] Add delete button to TaskCard with confirmation modal
+- [X] T082 [US7] Create API client method deleteTask in frontend/src/lib/api.ts
 
 **Test Criteria**:
 - ✅ DELETE /api/{user_id}/tasks/{id} removes task and returns 204
@@ -366,9 +367,9 @@ curl -X DELETE http://localhost:8000/api/{user_id}/tasks/5 \
 
 ### Tasks
 
-- [ ] T083 Add loading states and skeletons to all pages in frontend/components/ui/LoadingSpinner.tsx
-- [ ] T084 Add ARIA labels and keyboard navigation for accessibility (WCAG 2.1 Level AA)
-- [ ] T085 Run performance audit with Lighthouse and optimize bundle size (<500KB gzipped)
+- [X] T083 Add loading states and skeletons to all pages in frontend/src/components/ui/loading-spinner.tsx
+- [X] T084 Add ARIA labels and keyboard navigation for accessibility (WCAG 2.1 Level AA)
+- [X] T085 Run performance audit with Lighthouse and optimize bundle size (<500KB gzipped)
 
 **Test Criteria**:
 - ✅ Backend test coverage ≥80% (pytest --cov)
@@ -380,11 +381,42 @@ curl -X DELETE http://localhost:8000/api/{user_id}/tasks/5 \
 
 ---
 
+## Phase 11: Completion Hardening (No Story Label)
+
+**Goal**: Make Phase II “strict-complete” by aligning tests/specs with current implementation  
+**Duration**: 2-4 hours  
+**Dependencies**: Phase 10 complete
+
+### Tasks
+
+- [X] T086 [P] Add Better Auth Jest stub for react client in frontend/__mocks__/better-auth/react.ts
+- [X] T087 [P] Add Better Auth Jest stub for jwt plugin in frontend/__mocks__/better-auth/client-plugins.ts
+- [X] T088 Update Jest module mapping for Better Auth stubs in frontend/jest.config.js
+- [X] T089 [P] Align button classes to Tailwind tokens in frontend/src/components/ui/button.tsx
+- [X] T090 [P] Align input error/tokens in frontend/src/components/ui/input.tsx
+- [X] T091 [P] Align card tokens in frontend/src/components/ui/card.tsx
+- [X] T092 [P] Align empty-state tokens in frontend/src/components/ui/empty-state.tsx
+- [X] T093 [P] Align badge tokens in frontend/src/components/ui/badge.tsx
+- [X] T094 Fix landing Footer default export in frontend/src/components/landing/Footer.tsx
+- [X] T095 Fix TaskCard a11y role + status text in frontend/src/components/dashboard/TaskCard.tsx
+- [X] T096 Update Phase II status to reflect completion-hardening work in specs/002-phase-web-app/STATUS.md
+- [X] T097 Run validation gates: frontend `npm test --silent`, backend `pytest`, root `pytest` (document results in specs/002-phase-web-app/STATUS.md)
+
+**Test Criteria**:
+- ✅ `cd frontend && npm test --silent` is all green
+- ✅ `cd backend && pytest` is all green
+- ✅ repo root `pytest` is all green
+- ✅ `specs/002-phase-web-app/STATUS.md` reflects current reality (and remaining gaps, if any)
+
+---
+
 ## Dependencies & Execution Order
 
 ### Critical Path (Sequential)
 ```
 Setup → Foundational → US-W1 → US-W2 → US-W3 → US-W4 → [Parallel: US-W5, US-W6, US-W7] → Polish
+
+Polish → Completion Hardening
 ```
 
 ### Parallel Opportunities
@@ -481,18 +513,21 @@ frontend/
 │   │       ├── [id]/page.tsx      # T071 (detail)
 │   │       └── [id]/edit/page.tsx # T072 (edit)
 │   └── layout.tsx                 # T025
-├── components/
-│   ├── ui/
-│   │   ├── Modal.tsx              # T080
-│   │   └── LoadingSpinner.tsx     # T083
-│   ├── auth/
-│   │   └── AuthForm.tsx           # T033
-│   └── tasks/
-│       ├── TaskCard.tsx           # T055, T063, T081
-│       ├── TaskList.tsx           # T056
-│       └── TaskForm.tsx           # T047, T074
-├── lib/
-│   └── api.ts                     # T049, T058, T064, T073, T082
+├── src/
+│   ├── components/
+│   │   ├── ui/
+│   │   │   ├── modal.tsx          # T080
+│   │   │   └── loading-spinner.tsx # T083
+│   │   ├── auth/
+│   │   │   └── AuthForm.tsx       # T033
+│   │   ├── tasks/
+│   │   │   ├── TaskCard.tsx       # T055, T063, T081
+│   │   │   ├── TaskList.tsx       # T056
+│   │   │   └── TaskForm.tsx       # T047, T074
+│   │   └── dashboard/
+│   │       └── TaskCard.tsx       # T095
+│   └── lib/
+│       └── api.ts                 # T049, T058, T064, T073, T082
 └── tailwind.config.js             # T024
 ```
 

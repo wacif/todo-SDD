@@ -29,10 +29,12 @@ export function Navigation({ userName, onLogout, className }: NavigationProps) {
       localStorage.removeItem('user_id')
       localStorage.removeItem('user_email')
       localStorage.removeItem('user_name')
-      router.replace('/login')
+      router.replace?.('/login')
+      router.push?.('/login')
     } catch (error) {
       // Silently handle logout errors - user will be redirected to login anyway
-      router.replace('/login')
+      router.replace?.('/login')
+      router.push?.('/login')
     } finally {
       setIsLoggingOut(false)
     }
@@ -80,3 +82,4 @@ export function Navigation({ userName, onLogout, className }: NavigationProps) {
     </nav>
   )
 }
+
