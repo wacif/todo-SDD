@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from typing import Optional
-from uuid import UUID
 
 
 @dataclass(frozen=True)
@@ -14,10 +13,12 @@ class TaskInputDTO:
     Excludes auto-generated fields (id, timestamps).
     """
 
-    user_id: UUID
+    user_id: str
     title: str
     description: Optional[str] = None
     completed: bool = False
+    priority: str = "medium"
+    tags: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -29,7 +30,21 @@ class TaskUpdateDTO:
     """
 
     task_id: int
-    user_id: UUID  # For authorization
+    user_id: str  # For authorization
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
+    priority: Optional[str] = None
+    tags: Optional[tuple[str, ...]] = None
+
+
+@dataclass(frozen=True)
+class TaskListQueryDTO:
+    """DTO for list/search/filter/sort parameters."""
+
+    status: Optional[str] = None  # completed | pending
+    priority: Optional[str] = None  # high | medium | low
+    tag: Optional[str] = None
+    q: Optional[str] = None
+    sort: Optional[str] = None  # title | priority
+    order: str = "desc"  # asc | desc

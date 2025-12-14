@@ -1,3 +1,23 @@
+<!--
+Sync Impact Report
+
+- Version change: 1.1.0 → 1.2.0
+- Modified principles:
+   - I. Spec-Driven Development (clarified “no manual code” enforcement)
+   - III. Test-First Development (clarified required test mapping to acceptance scenarios)
+- Added sections:
+   - VIII. Spec Re-baselining & Alignment (NON-NEGOTIABLE)
+   - IX. Documentation & Research Discipline (Context7-first)
+   - X. Monorepo Organization (NON-NEGOTIABLE)
+   - Better Auth token verification compatibility note (Phase II security)
+- Removed sections: none
+- Templates requiring updates:
+   - ✅ `.specify/templates/plan-template.md`
+   - ✅ `.specify/templates/spec-template.md`
+   - ✅ `.specify/templates/tasks-template.md` (no change needed)
+- Follow-up TODOs: none
+-->
+
 # Evolution of Todo Constitution
 
 ## Core Principles
@@ -46,6 +66,46 @@
 - End-to-end tests for user workflows (Phase II+)
 
 **Rationale**: Ensures correctness, enables confident refactoring, and validates spec completeness.
+
+### VIII. Spec Re-baselining & Alignment (NON-NEGOTIABLE)
+
+**When requirements change, specs MUST be re-baselined before code changes:**
+- Specs are the source of truth; implementation is disposable
+- If an implemented behavior does not match current hackathon requirements, update the spec first
+- Existing specs MUST be brought up to date (or explicitly marked **Deprecated**) before planning new work
+- Each phase MUST have a complete spec set for its required features before it is considered “done”
+
+**Spec status rules:**
+- Each feature spec MUST declare a status: Draft | Approved | Deprecated
+- Deprecated specs MUST remain in the repo for auditability, but MUST NOT drive new implementation
+
+**Rationale**: The hackathon grading is based on spec-driven iteration. Re-baselining prevents drift.
+
+### IX. Documentation & Research Discipline (Context7-first)
+
+**When gathering library/framework documentation, agents MUST use Context7 first:**
+- Prefer Context7 for authoritative, up-to-date API references and examples
+- If Context7 does not have the needed library/page, document the gap in the plan and use the next
+   most authoritative source (official docs), noting the URL
+- Avoid copy-pasting large blocks of external text; summarize and link
+
+**Rationale**: Reduces hallucinations and keeps design decisions grounded in current docs.
+
+### X. Monorepo Organization (NON-NEGOTIABLE)
+
+**This project MUST remain a monorepo with clear boundaries:**
+- `frontend/` contains the Next.js app and frontend-only dependencies
+- `backend/` contains the FastAPI app, migrations, and backend-only dependencies
+- `specs/` contains all specs (per-phase and per-feature)
+- `.specify/` contains templates, memory, and Spec-Kit workflow assets
+- `history/` contains PHRs and ADRs
+
+**Rules:**
+- No accidental extra app scaffolds in repository root (e.g., stray `package.json`, `node_modules/`)
+- Shared docs live at repo root (`README.md`, `CLAUDE.md`, `AGENTS.md` if used)
+- Cross-cutting changes MUST update both stack parts when required (API contract, auth, env vars)
+
+**Rationale**: Enables cross-stack, spec-driven iteration with a single source of truth.
 
 ### IV. Clean Architecture & Separation of Concerns
 
@@ -107,8 +167,7 @@ src/
 - Graceful error handling with helpful suggestions
 
 **Technology stack (Phase III):**
-- OpenAI ChatKit for chat interface
-- OpenAI Agents SDK for agent orchestration
+- OpenAI ChatKit for chat interface and agent orchestration
 - Official MCP SDK for tool integration
 
 **Integration pattern:**
@@ -320,6 +379,11 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 - Priorities and tags/categories working
 - Test coverage ≥ 85%
 
+**Security note (Phase II):**
+- The backend MUST verify Better Auth-issued tokens in a way that matches the configured signing
+   strategy (e.g., shared-secret JWT verification or JWKS-based verification).
+- The authenticated user identity MUST be enforced consistently across API routes and persistence.
+
 ### Phase III Requirements (Due: Dec 21, 2025)
 
 **Additional Deliverables:**
@@ -404,4 +468,4 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 - Create ADRs for architectural decisions
 - Record PHRs for learning and traceability
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-06 | **Last Amended**: 2025-12-06
+**Version**: 1.2.0 | **Ratified**: 2025-12-06 | **Last Amended**: 2025-12-12

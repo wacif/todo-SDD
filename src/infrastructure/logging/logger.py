@@ -34,4 +34,4 @@ def setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:
 
 
 # Application logger
-app_logger = setup_logger("todo_app")
+app_logger = setup_logger("dobot")

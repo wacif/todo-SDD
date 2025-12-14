@@ -12,7 +12,7 @@ class Settings:
     Future phases will expand this with database URLs, API keys, etc.
     """
 
-    app_name: str = "Todo App"
+    app_name: str = "DoBot"
     version: str = "0.1.0"
     debug: bool = False
 

@@ -25,9 +25,9 @@ export const Features: React.FC = () => {
     <section id="features" className="py-24 bg-black relative">
       <div className="container mx-auto px-6">
         <div className="text-center max-w-2xl mx-auto mb-20">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Not just another todo list.</h2>
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Not just another task list.</h2>
           <p className="text-gray-400 text-lg">
-            Built for high-performers who need more than just a checkbox. TaskFlow adapts to your working style.
+            Built for high-performers who need more than just a checkbox. DoBot adapts to your working style.
           </p>
         </div>
 

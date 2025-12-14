@@ -46,7 +46,7 @@ const StepCard = ({ step, isLast }: { step: WorkflowStep; isLast: boolean }) => 
 };
 
 // Server Component
-export default function HowItWorks({ content }: HowItWorksProps) {
+export function HowItWorks({ content }: HowItWorksProps) {
   return (
     <section id="how-it-works" className="py-16 sm:py-24 bg-white dark:bg-gray-800" aria-labelledby="how-it-works-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

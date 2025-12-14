@@ -43,7 +43,7 @@ export const AiShowcase: React.FC = () => {
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">It starts with <br/> <span className="text-gray-500">Understanding.</span></h2>
               <p className="text-xl text-gray-400 max-w-md">
-                TaskFlow doesn&apos;t just store your tasks. It reads them. Our AI analyzes intent, urgency, and context from a single sentence.
+                DoBot doesn&apos;t just store your tasks. It reads them. Our AI analyzes intent, urgency, and context from a single sentence.
               </p>
             </motion.div>
 
@@ -63,7 +63,7 @@ export const AiShowcase: React.FC = () => {
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Achieving <br/> <span className="text-purple-500">Flow State.</span></h2>
               <p className="text-xl text-gray-400 max-w-md">
-                With your path clear, you enter the zone. TaskFlow manages the cognitive load so you can focus purely on execution.
+                With your path clear, you enter the zone. DoBot manages the cognitive load so you can focus purely on execution.
               </p>
             </motion.div>
           </div>

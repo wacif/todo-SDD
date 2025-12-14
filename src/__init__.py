@@ -1,3 +1,3 @@
-"""Todo Application - Phase I: Basic Todo Management"""
+"""DoBot - Phase I: Basic Task Management"""
 
 __version__ = "0.1.0"

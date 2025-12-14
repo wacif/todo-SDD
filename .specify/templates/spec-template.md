@@ -3,6 +3,7 @@
 **Feature Branch**: `[###-feature-name]`  
 **Created**: [DATE]  
 **Status**: Draft  
+**Phase**: [Phase I | Phase II | Phase III | Phase IV | Phase V]  
 **Input**: User description: "$ARGUMENTS"
 
 ## User Scenarios & Testing *(mandatory)*

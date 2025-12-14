@@ -1,12 +1,12 @@
 // frontend/src/components/landing/FeaturesSection.tsx
-import { FeaturesSection, Feature } from '@/lib/types/landing';
-import FeatureCard from './FeatureCard';
+import { FeaturesSection as FeaturesSectionType, Feature } from '@/lib/types/landing';
+import { FeatureCard } from './FeatureCard';
 
 interface FeaturesSectionProps {
-  content: FeaturesSection;
+  content: FeaturesSectionType;
 }
 
-export default function LandingFeaturesSection({ content }: FeaturesSectionProps) {
+export function FeaturesSection({ content }: FeaturesSectionProps) {
   return (
     <section id="features" className="py-16 sm:py-24 bg-muted" aria-labelledby="features-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

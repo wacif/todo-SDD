@@ -26,7 +26,7 @@ class TestLogging:
     def test_app_logger_exists(self):
         """Test that app_logger is configured."""
         assert isinstance(app_logger, logging.Logger)
-        assert app_logger.name == "todo_app"
+        assert app_logger.name == "dobot"
 
     def test_logger_has_handler(self):
         """Test that logger has at least one handler."""

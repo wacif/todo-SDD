@@ -7,19 +7,21 @@ import { Inbox } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Task {
-  id: string
+  id: number
   title: string
   description: string | null
   completed: boolean
+  priority: 'high' | 'medium' | 'low'
+  tags: string[]
   created_at: string
   updated_at: string
 }
 
 interface TaskListProps {
   tasks: Task[]
-  onToggleComplete: (id: string) => void
+  onToggleComplete: (id: number) => void
   onEdit?: (task: Task) => void
-  onDelete?: (id: string) => void
+  onDelete?: (id: number) => void
   filter?: 'all' | 'pending' | 'completed'
   emptyMessage?: string
 }

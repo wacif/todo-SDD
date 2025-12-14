@@ -31,7 +31,14 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Spec-first: spec exists and is current (not Deprecated)
+- [ ] No manual code: implementation will be generated via Claude Code from specs/tasks
+- [ ] Test mapping: acceptance scenarios map to tests (or explicit rationale if tests omitted)
+- [ ] Clean architecture: changes confined to appropriate layer(s)
+- [ ] Phase alignment: feature belongs to the current phase requirements
+- [ ] Security: auth boundaries and user isolation considered (Phase II+)
+- [ ] Documentation: Context7 used for library docs (or gap documented)
+- [ ] Repo layout: monorepo boundaries respected (`frontend/`, `backend/`, `specs/`)
 
 ## Project Structure
 

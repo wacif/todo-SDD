@@ -56,7 +56,7 @@ export const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
             </h1>
             
             <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
-              Stop drowning in tasks. TaskFlow uses intelligent sorting and AI breakdowns to help you focus on what actually matters, right now.
+              Stop drowning in tasks. DoBot uses intelligent sorting and AI breakdowns to help you focus on what actually matters, right now.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">

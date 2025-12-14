@@ -136,5 +136,5 @@ export const HeroComponent: React.FC<HeroProps> = ({ heroContent }) => {
   );
 };
 
-const LandingHero = () => <HeroComponent heroContent={landingContent.hero} />;
-export default LandingHero;
+export const Hero = () => <HeroComponent heroContent={landingContent.hero} />;
+

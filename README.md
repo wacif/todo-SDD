@@ -1,4 +1,4 @@
-# Todo App - Phase I: Basic Todo Management
+# DoBot - Phase I: Basic Task Management
 
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-108%20passing-brightgreen.svg)](tests/)
@@ -9,7 +9,7 @@ A clean, well-tested command-line todo application built with Python 3.13+ follo
 
 ## ✨ Features
 
-### Phase I - Basic Todo Management (Current)
+### Phase I - Basic Task Management (Current)
 
 - ✅ **Add Task**: Create new tasks with title and optional description
 - ✅ **View All Tasks**: Display tasks in a formatted table with status indicators
@@ -60,7 +60,7 @@ python main.py
 ### Usage Example
 
 ```
-📝 Todo App - Phase I
+📝 DoBot - Phase I
 
 Main Menu
   [1] ➕ Add Task

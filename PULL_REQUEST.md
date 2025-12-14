@@ -1,4 +1,4 @@
-# Pull Request: Phase I - Basic Todo Management
+# Pull Request: Phase I - Basic Task Management
 
 ## 🎯 Overview
 

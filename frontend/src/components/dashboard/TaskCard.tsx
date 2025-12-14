@@ -8,19 +8,21 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface Task {
-  id: string
+  id: number
   title: string
   description: string | null
   completed: boolean
+  priority: 'high' | 'medium' | 'low'
+  tags: string[]
   created_at: string
   updated_at: string
 }
 
 interface TaskCardProps {
   task: Task
-  onToggleComplete: (id: string) => void
+  onToggleComplete: (id: number) => void
   onEdit?: (task: Task) => void
-  onDelete?: (id: string) => void
+  onDelete?: (id: number) => void
 }
 
 export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardProps) {
@@ -28,6 +30,13 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
     month: 'short',
     day: 'numeric',
   })
+
+  const priorityVariant =
+    task.priority === 'high'
+      ? 'error'
+      : task.priority === 'medium'
+        ? 'warning'
+        : 'secondary'
 
   return (
     <motion.div
@@ -78,6 +87,7 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
                 <Button
                   variant="ghost"
                   size="sm"
+                  aria-label="Edit task"
                   onClick={(e) => {
                     e.stopPropagation()
                     onEdit(task)
@@ -91,6 +101,7 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
                 <Button
                   variant="ghost"
                   size="sm"
+                  aria-label="Delete task"
                   onClick={(e) => {
                     e.stopPropagation()
                     onDelete(task.id)
@@ -101,6 +112,22 @@ export function TaskCard({ task, onToggleComplete, onEdit, onDelete }: TaskCardP
                 </Button>
               )}
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <Badge variant={priorityVariant} size="sm">
+              {task.priority}
+            </Badge>
+            {task.tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="outline" size="sm" className="border-gray-700 text-gray-200">
+                {tag}
+              </Badge>
+            ))}
+            {task.tags.length > 3 && (
+              <Badge variant="outline" size="sm" className="border-gray-700 text-gray-200">
+                +{task.tags.length - 3}
+              </Badge>
+            )}
           </div>
           
           {task.description && (

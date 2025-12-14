@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { LogOut, User, Sparkles } from 'lucide-react'
+import { signOut } from '@/lib/auth-client'
 
 interface NavigationProps {
   userName?: string
@@ -22,11 +23,16 @@ export function Navigation({ userName, onLogout, className }: NavigationProps) {
       if (onLogout) {
         await onLogout()
       }
+      await signOut()
       // Clear auth and redirect
-      localStorage.removeItem('token')
-      router.push('/login')
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user_id')
+      localStorage.removeItem('user_email')
+      localStorage.removeItem('user_name')
+      router.replace('/login')
     } catch (error) {
       // Silently handle logout errors - user will be redirected to login anyway
+      router.replace('/login')
     } finally {
       setIsLoggingOut(false)
     }
@@ -46,7 +52,7 @@ export function Navigation({ userName, onLogout, className }: NavigationProps) {
               <Sparkles className="h-5 w-5" />
               <div className="absolute inset-0 rounded-lg bg-indigo-500/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">TaskFlow</span>
+            <span className="text-lg font-bold text-white tracking-tight">DoBot</span>
           </div>
 
           <div className="flex items-center gap-4">

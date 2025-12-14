@@ -110,7 +110,7 @@ Authorization: Bearer <token>
     {
       "id": "uuid",
       "title": "Complete project",
-      "description": "Finish the todo app",
+      "description": "Finish DoBot",
       "completed": false,
       "createdAt": "2025-12-12T10:00:00Z",
       "updatedAt": "2025-12-12T10:00:00Z"

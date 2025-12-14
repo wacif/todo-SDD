@@ -83,7 +83,7 @@ describe('Footer Component', () => {
 
     // Check one item from the default content (Phase 1 T003 constants)
     const year = new Date().getFullYear();
-    expect(screen.getByText(`© ${year} Todo App. All rights reserved.`)).toBeInTheDocument();
+    expect(screen.getByText(`© ${year} DoBot. All rights reserved.`)).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /Legal/i, level: 3 })).toBeInTheDocument();
   });
 });

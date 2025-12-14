@@ -1,7 +1,6 @@
 """Mark task complete use case - toggle task completion status."""
 
 from datetime import datetime
-from uuid import UUID
 
 from src.application.dto.task_dto import TaskDTO
 from src.domain.entities.task import Task
@@ -34,7 +33,7 @@ class MarkTaskCompleteUseCase:
         """
         self._task_repository = task_repository
 
-    def execute(self, task_id: int, user_id: UUID, completed: bool) -> TaskDTO:
+    def execute(self, task_id: int, user_id: str, completed: bool) -> TaskDTO:
         """
         Execute the mark task complete use case.
 
@@ -60,6 +59,8 @@ class MarkTaskCompleteUseCase:
             title=existing_task.title,
             description=existing_task.description,
             completed=completed,
+            priority=existing_task.priority,
+            tags=existing_task.tags,
             created_at=existing_task.created_at,  # Immutable
             updated_at=datetime.utcnow(),  # Refresh timestamp
         )
@@ -74,6 +75,8 @@ class MarkTaskCompleteUseCase:
             title=saved_task.title,
             description=saved_task.description,
             completed=saved_task.completed,
+            priority=saved_task.priority,
+            tags=saved_task.tags,
             created_at=saved_task.created_at,
             updated_at=saved_task.updated_at,
         )

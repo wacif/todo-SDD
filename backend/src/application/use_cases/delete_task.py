@@ -1,7 +1,5 @@
 """Delete task use case - remove task from repository."""
 
-from uuid import UUID
-
 from src.domain.repositories.task_repository import TaskRepository
 
 
@@ -27,7 +25,7 @@ class DeleteTaskUseCase:
         """
         self._task_repository = task_repository
 
-    def execute(self, task_id: int, user_id: UUID) -> None:
+    def execute(self, task_id: int, user_id: str) -> None:
         """
         Execute the delete task use case.
 

@@ -252,6 +252,175 @@ def test_user_isolation(client, auth_user):
     assert data2["tasks"][0]["title"] == "User 2 task"
 
 
+def test_create_task_with_priority_and_tags(client, auth_user):
+    """Phase II: create task with priority and tags/categories."""
+    response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={
+            "title": "Pay invoices",
+            "description": "Before Friday",
+            "priority": "high",
+            "tags": ["work", "finance"],
+        },
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["priority"] == "high"
+    assert set(data["tags"]) == {"work", "finance"}
+
+
+def test_list_tasks_filter_by_status_completed(client, auth_user):
+    """Phase II: filter tasks by completion status."""
+    # Create two tasks
+    t1 = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Task A"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    ).json()
+    t2 = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Task B"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    ).json()
+
+    # Mark Task A complete
+    resp_toggle = client.patch(
+        f"/api/{auth_user['user_id']}/tasks/{t1['id']}/complete",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert resp_toggle.status_code == 200
+
+    # Filter completed
+    response = client.get(
+        f"/api/{auth_user['user_id']}/tasks?status=completed",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert all(t["completed"] is True for t in data["tasks"])
+    assert {t["id"] for t in data["tasks"]} == {t1["id"]}
+    # Ensure incomplete task not returned
+    assert t2["id"] not in {t["id"] for t in data["tasks"]}
+
+
+def test_list_tasks_filter_by_priority(client, auth_user):
+    """Phase II: filter tasks by priority."""
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "High task", "priority": "high"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Low task", "priority": "low"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+
+    response = client.get(
+        f"/api/{auth_user['user_id']}/tasks?priority=high",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert all(t["priority"] == "high" for t in data["tasks"])
+
+
+def test_list_tasks_filter_by_tag(client, auth_user):
+    """Phase II: filter tasks by tag/category."""
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Work thing", "tags": ["work"]},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Home thing", "tags": ["home"]},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+
+    response = client.get(
+        f"/api/{auth_user['user_id']}/tasks?tag=work",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert all("work" in t["tags"] for t in data["tasks"])
+
+
+def test_list_tasks_search_keyword(client, auth_user):
+    """Phase II: search tasks by keyword in title/description."""
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Buy milk", "description": "From store"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Call mom", "description": "Weekend"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+
+    response = client.get(
+        f"/api/{auth_user['user_id']}/tasks?q=milk",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["tasks"]) == 1
+    assert data["tasks"][0]["title"] == "Buy milk"
+
+
+def test_list_tasks_sort_title_asc(client, auth_user):
+    """Phase II: sort tasks by title alphabetically."""
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Z task"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "A task"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+
+    response = client.get(
+        f"/api/{auth_user['user_id']}/tasks?sort=title&order=asc",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 200
+    titles = [t["title"] for t in response.json()["tasks"]]
+    assert titles == sorted(titles)
+
+
+def test_list_tasks_sort_priority_desc(client, auth_user):
+    """Phase II: sort tasks by priority (high > medium > low)."""
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Low", "priority": "low"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "High", "priority": "high"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Medium", "priority": "medium"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+
+    response = client.get(
+        f"/api/{auth_user['user_id']}/tasks?sort=priority&order=desc",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 200
+    priorities = [t["priority"] for t in response.json()["tasks"]]
+    assert priorities[:3] == ["high", "medium", "low"]
+
+
 def test_toggle_task_complete_success(client, auth_user):
     """Test successfully toggling task completion status."""
     # Create a task

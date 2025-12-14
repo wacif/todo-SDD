@@ -1,4 +1,4 @@
-# Claude Code Context: Todo App
+# Claude Code Context: DoBot
 
 ## Project Overview
 

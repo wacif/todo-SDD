@@ -19,13 +19,13 @@ class EntityNotFoundError(DomainException):
     pass
 
 
-class DuplicateEntityError(DomainException):
-    """Raised when attempting to create duplicate entity."""
+class UnauthorizedError(DomainException):
+    """Raised when user is not authorized to perform an action."""
 
     pass
 
 
-class UnauthorizedError(DomainException):
-    """Raised when user lacks permission for operation."""
+class DuplicateEntityError(DomainException):
+    """Raised when attempting to create duplicate entity."""
 
     pass

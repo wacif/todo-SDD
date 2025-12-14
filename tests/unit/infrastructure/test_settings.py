@@ -8,7 +8,7 @@ class TestSettings:
 
     def test_default_settings(self):
         """Test default settings values."""
-        assert settings.app_name == "Todo App"
+        assert settings.app_name == "DoBot"
         assert settings.version == "0.1.0"
         assert settings.debug is False
 

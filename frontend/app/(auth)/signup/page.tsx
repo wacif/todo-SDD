@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AuthForm, { AuthFormData } from '@/components/auth/AuthForm'
 import { ToastProvider, useToast } from '@/components/ui/toast'
+import { signUp } from '@/lib/auth-client'
 
 function SignupContent() {
   const router = useRouter()
@@ -38,37 +39,14 @@ function SignupContent() {
     setLoading(true)
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/signup`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: data.email,
-            name: data.name,
-            password: data.password,
-          }),
-        }
-      )
+      const { data: signUpData, error: signUpError } = await signUp.email({
+        email: data.email,
+        password: data.password,
+        name: data.name || '',
+      })
 
-      const responseData = await response.json()
-
-      if (!response.ok) {
-        // Handle different error status codes
-        if (response.status === 409) {
-          setError('An account with this email already exists')
-        } else if (response.status === 422) {
-          const detail = responseData.detail
-          if (Array.isArray(detail)) {
-            setError(detail[0]?.msg || 'Validation error')
-          } else {
-            setError(detail || 'Validation error')
-          }
-        } else {
-          setError('An unexpected error occurred. Please try again.')
-        }
+      if (signUpError) {
+        setError(signUpError.message || 'An unexpected error occurred. Please try again.')
         setLoading(false)
         return
       }

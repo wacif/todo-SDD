@@ -36,6 +36,8 @@ export interface Task {
   title: string;
   description: string | null;
   completed: boolean;
+  priority: 'high' | 'medium' | 'low';
+  tags: string[];
   created_at: string;
   updated_at: string;
 }
@@ -46,6 +48,17 @@ export interface Task {
 export interface TaskInput {
   title: string;
   description?: string | null;
+  priority?: 'high' | 'medium' | 'low';
+  tags?: string[];
+}
+
+export interface TaskListQuery {
+  status?: 'completed' | 'pending';
+  priority?: 'high' | 'medium' | 'low';
+  tag?: string;
+  q?: string;
+  sort?: 'title' | 'priority';
+  order?: 'asc' | 'desc';
 }
 
 /**
@@ -92,13 +105,28 @@ export async function createTask(
 /**
  * List all tasks for a user
  */
-export async function listTasks(userId: string): Promise<TaskListResponse> {
+export async function listTasks(
+  userId: string,
+  query: TaskListQuery = {}
+): Promise<TaskListResponse> {
   const token = getAuthToken();
   if (!token) {
     throw new ApiError('Not authenticated', 401);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/${userId}/tasks`, {
+  const params = new URLSearchParams();
+  if (query.status) params.set('status', query.status);
+  if (query.priority) params.set('priority', query.priority);
+  if (query.tag) params.set('tag', query.tag);
+  if (query.q) params.set('q', query.q);
+  if (query.sort) params.set('sort', query.sort);
+  if (query.order) params.set('order', query.order);
+
+  const url = params.toString()
+    ? `${API_BASE_URL}/api/${userId}/tasks?${params.toString()}`
+    : `${API_BASE_URL}/api/${userId}/tasks`;
+
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,

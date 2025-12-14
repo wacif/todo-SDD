@@ -14,7 +14,7 @@ const testimonials = [
   {
     name: "Sarah Chen",
     role: "Founder @ Nexus",
-    content: "I've tried every todo app since 2015. TaskFlow is the first one that actually helps me do the work instead of just listing it.",
+    content: "I've tried every todo app since 2015. DoBot is the first one that actually helps me do the work instead of just listing it.",
     avatar: "SC"
   },
   {
@@ -75,7 +75,7 @@ export const Testimonials: React.FC = () => {
             <div className="text-center max-w-2xl mx-auto mb-16">
                 <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Built for flow.</h2>
                 <p className="text-gray-400 text-lg">
-                    Join thousands of high-performers who trust TaskFlow to manage their most important work.
+                  Join thousands of high-performers who trust DoBot to manage their most important work.
                 </p>
             </div>
             

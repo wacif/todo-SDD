@@ -2,9 +2,8 @@
 
 from datetime import datetime
 from typing import Annotated
-from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel import Session
 
 from src.api.dependencies import get_current_user_id
@@ -12,6 +11,7 @@ from src.api.models.task_models import TaskInputDTO, TaskListResponse, TaskRespo
 from src.application.dto.task_dto import TaskDTO
 from src.application.dto.task_input_dto import (
     TaskInputDTO as UseCaseTaskInputDTO,
+    TaskListQueryDTO,
     TaskUpdateDTO,
 )
 from src.application.use_cases.add_task import AddTaskUseCase
@@ -36,7 +36,7 @@ def get_task_repository(session: Session = Depends(get_session)) -> TaskReposito
     return PostgresTaskRepository(session)
 
 
-def validate_user_ownership(path_user_id: UUID, token_user_id: UUID) -> None:
+def validate_user_ownership(path_user_id: str, token_user_id: str) -> None:
     """
     Validate that the user_id in the path matches the authenticated user.
 
@@ -70,6 +70,8 @@ def task_dto_to_response(task: TaskDTO) -> TaskResponse:
         title=task.title,
         description=task.description,
         completed=task.completed,
+        priority=task.priority,
+        tags=list(task.tags),
         created_at=task.created_at.isoformat(),
         updated_at=task.updated_at.isoformat(),
     )
@@ -81,9 +83,9 @@ def task_dto_to_response(task: TaskDTO) -> TaskResponse:
     status_code=status.HTTP_201_CREATED,
 )
 async def create_task(
-    user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
+    user_id: Annotated[str, Path(description="User ID (must match authenticated user)")],
     request: TaskInputDTO,
-    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
+    current_user_id: Annotated[str, Depends(get_current_user_id)],
     task_repository: TaskRepository = Depends(get_task_repository),
 ):
     """
@@ -103,6 +105,8 @@ async def create_task(
         title=request.title,
         description=request.description,
         completed=False,  # New tasks default to incomplete
+        priority=request.priority,
+        tags=tuple(request.tags or []),
     )
 
     try:
@@ -122,9 +126,15 @@ async def create_task(
 
 @router.get("/{user_id}/tasks", response_model=TaskListResponse)
 async def list_tasks(
-    user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
-    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
+    user_id: Annotated[str, Path(description="User ID (must match authenticated user)")],
+    current_user_id: Annotated[str, Depends(get_current_user_id)],
     task_repository: TaskRepository = Depends(get_task_repository),
+    status_q: Annotated[str | None, Query(alias="status")] = None,
+    priority_q: Annotated[str | None, Query(alias="priority")] = None,
+    tag_q: Annotated[str | None, Query(alias="tag")] = None,
+    q_q: Annotated[str | None, Query(alias="q")] = None,
+    sort_q: Annotated[str | None, Query(alias="sort")] = None,
+    order_q: Annotated[str | None, Query(alias="order")] = None,
 ):
     """
     List all tasks for the authenticated user.
@@ -139,7 +149,15 @@ async def list_tasks(
     try:
         # Execute use case
         use_case = ListTasksUseCase(task_repository)
-        task_dtos = use_case.execute(current_user_id)
+        query = TaskListQueryDTO(
+            status=status_q,
+            priority=priority_q,
+            tag=tag_q,
+            q=q_q,
+            sort=sort_q,
+            order=order_q or "desc",
+        )
+        task_dtos = use_case.execute(current_user_id, query)
 
         # Convert to API response
         tasks = [task_dto_to_response(task) for task in task_dtos]
@@ -151,10 +169,10 @@ async def list_tasks(
 
 @router.put("/{user_id}/tasks/{task_id}", response_model=TaskResponse)
 async def update_task(
-    user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
+    user_id: Annotated[str, Path(description="User ID (must match authenticated user)")],
     task_id: Annotated[int, Path(description="Task ID to update")],
     request: TaskInputDTO,
-    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
+    current_user_id: Annotated[str, Depends(get_current_user_id)],
     task_repository: TaskRepository = Depends(get_task_repository),
 ):
     """
@@ -173,6 +191,8 @@ async def update_task(
         user_id=current_user_id,
         title=request.title,
         description=request.description,
+        priority=request.priority,
+        tags=tuple(request.tags or []),
     )
 
     try:
@@ -193,9 +213,9 @@ async def update_task(
 
 @router.delete("/{user_id}/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
-    user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
+    user_id: Annotated[str, Path(description="User ID (must match authenticated user)")],
     task_id: Annotated[int, Path(description="Task ID to delete")],
-    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
+    current_user_id: Annotated[str, Depends(get_current_user_id)],
     task_repository: TaskRepository = Depends(get_task_repository),
 ):
     """
@@ -218,11 +238,11 @@ async def delete_task(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
-@router.put("/{user_id}/tasks/{task_id}/complete", response_model=TaskResponse)
+@router.patch("/{user_id}/tasks/{task_id}/complete", response_model=TaskResponse)
 async def toggle_task_complete(
-    user_id: Annotated[UUID, Path(description="User ID (must match authenticated user)")],
+    user_id: Annotated[str, Path(description="User ID (must match authenticated user)")],
     task_id: Annotated[int, Path(description="Task ID to toggle completion status")],
-    current_user_id: Annotated[UUID, Depends(get_current_user_id)],
+    current_user_id: Annotated[str, Depends(get_current_user_id)],
     task_repository: TaskRepository = Depends(get_task_repository),
 ):
     """

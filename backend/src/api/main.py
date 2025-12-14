@@ -8,8 +8,8 @@ from src.api.routes.task_routes import router as task_router
 from src.infrastructure.config.settings import settings
 
 app = FastAPI(
-    title="Todo API",
-    description="Todo application API with user authentication",
+    title="DoBot API",
+    description="DoBot task management API with user authentication",
     version="1.0.0",
     debug=settings.debug,
 )

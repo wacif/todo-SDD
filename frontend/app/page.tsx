@@ -31,7 +31,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="font-bold text-white mb-4">TaskFlow</h4>
+              <h4 className="font-bold text-white mb-4">DoBot</h4>
               <p className="text-sm text-gray-400">
                 AI-powered productivity for modern teams.
               </p>
@@ -61,7 +61,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} TaskFlow. All rights reserved.
+            © {new Date().getFullYear()} DoBot. All rights reserved.
           </div>
         </div>
       </footer>
