@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Main entry point for Todo App - Phase I: Basic Todo Management."""
+"""Main entry point for DoBot - Phase I: Basic Task Management."""
 
 from src.infrastructure.persistence.in_memory_task_repository import InMemoryTaskRepository
 from src.interface.cli.console_app import ConsoleApp

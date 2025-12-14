@@ -1,4 +1,4 @@
-# Feature Specification: Phase II — Authenticated Web Todo App
+# Feature Specification: Phase II — Authenticated Web DoBot App
 
 **Feature Branch**: `001-phase2-web-app`  
 **Created**: 2025-12-12  

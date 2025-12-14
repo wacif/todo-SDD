@@ -52,7 +52,7 @@ export function Navigation({ userName, onLogout, className }: NavigationProps) {
               <Sparkles className="h-5 w-5" />
               <div className="absolute inset-0 rounded-lg bg-indigo-500/20 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">TaskFlow</span>
+            <span className="text-lg font-bold text-white tracking-tight">DoBot</span>
           </div>
 
           <div className="flex items-center gap-4">

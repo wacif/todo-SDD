@@ -1,7 +1,7 @@
 [project]
-name = "todo-app"
+name = "dobot"
 version = "0.1.0"
-description = "Phase I: Basic Todo Management - In-memory console application"
+description = "DoBot - Phase I: Basic Task Management - In-memory console application"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

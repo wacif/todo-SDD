@@ -7,7 +7,7 @@
 
 ## 📊 Overview
 
-Professional full-stack Todo application with modern UI/UX, complete test coverage, and production-grade code quality.
+Professional full-stack DoBot application with modern UI/UX, complete test coverage, and production-grade code quality.
 
 ### Key Metrics
 - **Frontend Tests:** 193/193 passing (17 suites)

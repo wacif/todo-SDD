@@ -34,7 +34,7 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 const mockNavigationContent: Navigation = {
   logo: {
     src: '/images/logo.svg',
-    alt: 'Todo App Logo',
+    alt: 'DoBot Logo',
     href: '/',
   },
   links: [
@@ -80,8 +80,8 @@ describe('LandingNav Component (T008)', () => {
     render(<LandingNavComponent navigationContent={mockNavigationContent} />);
 
     // Check logo
-    expect(screen.getByRole('img', { name: /Todo App Logo/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Todo App Logo/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('img', { name: /DoBot Logo/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /DoBot Logo/i })).toHaveAttribute('href', '/');
 
     // Check desktop links
     expect(screen.getByRole('link', { name: /Features/i, hidden: true })).toBeInTheDocument();

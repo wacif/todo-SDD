@@ -1,6 +1,6 @@
-# Todo App Backend
+# DoBot Backend
 
-FastAPI backend for the Todo application.
+FastAPI backend for the DoBot application.
 
 ## Setup
 

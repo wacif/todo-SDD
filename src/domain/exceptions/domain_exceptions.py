@@ -1,4 +1,4 @@
-"""Domain exceptions for the todo application."""
+"""Domain exceptions for the DoBot application."""
 
 
 class DomainException(Exception):

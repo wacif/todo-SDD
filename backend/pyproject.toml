@@ -1,7 +1,7 @@
 [project]
-name = "todo-backend"
+name = "dobot-backend"
 version = "1.0.0"
-description = "Todo App Backend - FastAPI + SQLModel"
+description = "DoBot Backend - FastAPI + SQLModel"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

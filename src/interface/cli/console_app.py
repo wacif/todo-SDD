@@ -76,7 +76,7 @@ class ConsoleApp:
 
     def _show_welcome(self) -> None:
         """Display welcome banner."""
-        welcome_text = Text("📝 Todo App - Phase I", style="bold cyan", justify="center")
+        welcome_text = Text("📝 DoBot - Phase I", style="bold cyan", justify="center")
         panel = Panel(welcome_text, border_style="cyan")
         self.console.print(panel)
         self.console.print()
@@ -218,4 +218,4 @@ class ConsoleApp:
 
     def _handle_exit(self) -> None:
         """Handle exit operation."""
-        self.console.print("\n[bold cyan]Thank you for using Todo App! 👋[/bold cyan]\n")
+        self.console.print("\n[bold cyan]Thank you for using DoBot! 👋[/bold cyan]\n")

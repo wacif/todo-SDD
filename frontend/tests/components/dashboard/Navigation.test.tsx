@@ -14,7 +14,7 @@ describe('Navigation', () => {
   describe('Rendering', () => {
     it('renders app name', () => {
       render(<Navigation />)
-      expect(screen.getByText('TaskFlow')).toBeInTheDocument()
+      expect(screen.getByText('DoBot')).toBeInTheDocument()
     })
 
     it('renders logout button', () => {

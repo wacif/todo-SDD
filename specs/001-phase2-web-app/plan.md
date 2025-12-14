@@ -1,4 +1,4 @@
-# Implementation Plan: Phase II — Authenticated Web Todo App
+# Implementation Plan: Phase II — Authenticated Web DoBot App
 
 **Branch**: `001-phase2-web-app` | **Date**: 2025-12-12 | **Spec**: `specs/001-phase2-web-app/spec.md`
 **Input**: Feature specification from `specs/001-phase2-web-app/spec.md`

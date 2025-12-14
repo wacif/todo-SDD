@@ -172,7 +172,7 @@ const howItWorksSection: LandingContent['howItWorks'] = {
 const navigation: LandingContent['navigation'] = {
   logo: {
     src: "/images/logo.svg",
-    alt: "Todo App",
+    alt: "DoBot",
     href: "/",
   },
   links: [
@@ -231,16 +231,16 @@ const footer: LandingContent['footer'] = {
       ],
     },
   ],
-  copyright: `© ${new Date().getFullYear()} Todo App. All rights reserved.`,
+  copyright: `© ${new Date().getFullYear()} DoBot. All rights reserved.`,
   socialLinks: [
     {
       platform: "twitter",
-      url: "https://twitter.com/todoapp",
+      url: "https://twitter.com/dobot",
       ariaLabel: "Follow us on Twitter",
     },
     {
       platform: "github",
-      url: "https://github.com/todoapp",
+      url: "https://github.com/dobot",
       ariaLabel: "View our GitHub repository",
     },
   ],

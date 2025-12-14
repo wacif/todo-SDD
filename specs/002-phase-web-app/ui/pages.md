@@ -76,7 +76,7 @@ export default function RootLayout({
 **Metadata**:
 ```tsx
 export const metadata = {
-  title: 'Todo App - Manage Your Tasks',
+  title: 'DoBot - Manage Your Tasks',
   description: 'A modern task management application',
 }
 ```
@@ -182,7 +182,7 @@ export default async function HomePage() {
 **Metadata**:
 ```tsx
 export const metadata = {
-  title: 'Login - Todo App',
+  title: 'Login - DoBot',
   description: 'Sign in to your account',
 }
 ```
@@ -260,7 +260,7 @@ export default function LoginPage() {
 **Metadata**:
 ```tsx
 export const metadata = {
-  title: 'Sign Up - Todo App',
+  title: 'Sign Up - DoBot',
   description: 'Create your account',
 }
 ```
@@ -410,7 +410,7 @@ export default async function DashboardLayout({
 **Metadata**:
 ```tsx
 export const metadata = {
-  title: 'My Tasks - Todo App',
+  title: 'My Tasks - DoBot',
   description: 'View and manage your tasks',
 }
 ```
@@ -500,7 +500,7 @@ export default async function TasksPage({
 **Metadata**:
 ```tsx
 export const metadata = {
-  title: 'Create Task - Todo App',
+  title: 'Create Task - DoBot',
   description: 'Create a new task',
 }
 ```
@@ -574,7 +574,7 @@ export async function generateMetadata({
   const task = await fetchTask(params.id)
   
   return {
-    title: `${task.title} - Todo App`,
+    title: `${task.title} - DoBot`,
     description: task.description,
   }
 }
@@ -648,7 +648,7 @@ export async function generateMetadata({
   const task = await fetchTask(params.id)
   
   return {
-    title: `Edit: ${task.title} - Todo App`,
+    title: `Edit: ${task.title} - DoBot`,
     description: 'Edit task details',
   }
 }
@@ -812,7 +812,7 @@ Each page includes:
 **Example**:
 ```tsx
 export const metadata = {
-  title: 'My Tasks - Todo App',
+  title: 'My Tasks - DoBot',
   description: 'View and manage your tasks',
   openGraph: {
     title: 'My Tasks',
