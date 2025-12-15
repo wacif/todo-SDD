@@ -135,6 +135,8 @@ async def list_tasks(
     q_q: Annotated[str | None, Query(alias="q")] = None,
     sort_q: Annotated[str | None, Query(alias="sort")] = None,
     order_q: Annotated[str | None, Query(alias="order")] = None,
+    limit_q: Annotated[int, Query(alias="limit", ge=1, le=100)] = 20,
+    offset_q: Annotated[int, Query(alias="offset", ge=0)] = 0,
 ):
     """
     List all tasks for the authenticated user.
@@ -156,12 +158,24 @@ async def list_tasks(
             q=q_q,
             sort=sort_q,
             order=order_q or "desc",
+            limit=limit_q,
+            offset=offset_q,
         )
         task_dtos = use_case.execute(current_user_id, query)
 
+        total = task_repository.count_by_user(
+            current_user_id,
+            status=query.status,
+            priority=query.priority,
+            tag=query.tag,
+            q=query.q,
+        )
+
+        has_more = (query.offset + len(task_dtos)) < total
+
         # Convert to API response
         tasks = [task_dto_to_response(task) for task in task_dtos]
-        return TaskListResponse(tasks=tasks, total=len(tasks))
+        return TaskListResponse(tasks=tasks, total=total, has_more=has_more)
 
     except EntityNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

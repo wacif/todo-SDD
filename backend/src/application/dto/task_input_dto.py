@@ -48,3 +48,5 @@ class TaskListQueryDTO:
     q: Optional[str] = None
     sort: Optional[str] = None  # title | priority
     order: str = "desc"  # asc | desc
+    limit: int = 20
+    offset: int = 0

@@ -12,7 +12,7 @@ const badgeVariants = cva(
         warning: 'bg-warning text-white',
         error: 'bg-error text-white',
         secondary: 'bg-muted text-foreground',
-        outline: 'border border-border bg-background text-foreground',
+        outline: 'border border-border bg-transparent text-foreground',
       },
       size: {
         sm: 'text-xs px-2 py-0.5',

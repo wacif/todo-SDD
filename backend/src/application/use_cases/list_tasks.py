@@ -50,6 +50,8 @@ class ListTasksUseCase:
             q=query.q,
             sort=query.sort,
             order=query.order,
+            limit=query.limit,
+            offset=query.offset,
         )
 
         # Convert to DTOs

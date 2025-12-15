@@ -2,6 +2,7 @@
 
 import json
 
+from sqlalchemy import case, func, or_
 from sqlmodel import Session, select
 
 from src.domain.entities.task import Task
@@ -116,12 +117,62 @@ class PostgresTaskRepository:
         q: str | None = None,
         sort: str | None = None,
         order: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
     ) -> list[Task]:
-        """Retrieve tasks for a specific user with optional filter/search/sort."""
+        """Retrieve tasks for a specific user with optional filter/search/sort and pagination."""
+
         statement = select(TaskModel).where(TaskModel.user_id == user_id)
+
+        if status in {"completed", "pending"}:
+            statement = statement.where(TaskModel.completed == (status == "completed"))
+
+        if priority in {"high", "medium", "low"}:
+            statement = statement.where(TaskModel.priority == priority)
+
+        tag_norm = (tag or "").strip().lower()
+        if tag_norm:
+            # Stored as JSON array string, e.g. ["work","home"]. Match exact token.
+            statement = statement.where(TaskModel.tags.contains(f'"{tag_norm}"'))
+
+        q_norm = (q or "").strip().lower()
+        if q_norm:
+            like = f"%{q_norm}%"
+            statement = statement.where(
+                or_(
+                    func.lower(TaskModel.title).like(like),
+                    func.lower(TaskModel.description).like(like),
+                )
+            )
+
+        sort_key = (sort or "").strip().lower()
+        order_norm = (order or "desc").strip().lower()
+        is_desc = order_norm != "asc"
+
+        if sort_key == "title":
+            sort_expr = func.lower(TaskModel.title)
+        elif sort_key == "priority":
+            sort_expr = case(
+                (TaskModel.priority == "low", 1),
+                (TaskModel.priority == "medium", 2),
+                (TaskModel.priority == "high", 3),
+                else_=0,
+            )
+        else:
+            sort_expr = TaskModel.created_at
+
+        if is_desc:
+            statement = statement.order_by(sort_expr.desc(), TaskModel.id.desc())
+        else:
+            statement = statement.order_by(sort_expr.asc(), TaskModel.id.asc())
+
+        safe_limit = max(1, min(int(limit), 100))
+        safe_offset = max(0, int(offset))
+        statement = statement.offset(safe_offset).limit(safe_limit)
+
         task_models = self._session.exec(statement).all()
 
-        tasks: list[Task] = [
+        return [
             Task(
                 id=model.id,
                 user_id=model.user_id,
@@ -136,41 +187,43 @@ class PostgresTaskRepository:
             for model in task_models
         ]
 
+    def count_by_user(
+        self,
+        user_id: str,
+        status: str | None = None,
+        priority: str | None = None,
+        tag: str | None = None,
+        q: str | None = None,
+    ) -> int:
+        """Count tasks for a user with optional filter/search applied."""
+
+        statement = select(func.count()).select_from(TaskModel).where(TaskModel.user_id == user_id)
+
         if status in {"completed", "pending"}:
-            want_completed = status == "completed"
-            tasks = [t for t in tasks if t.completed is want_completed]
+            statement = statement.where(TaskModel.completed == (status == "completed"))
 
         if priority in {"high", "medium", "low"}:
-            tasks = [t for t in tasks if t.priority == priority]
+            statement = statement.where(TaskModel.priority == priority)
 
-        if tag:
-            tag_norm = tag.strip().lower()
-            if tag_norm:
-                tasks = [t for t in tasks if tag_norm in t.tags]
+        tag_norm = (tag or "").strip().lower()
+        if tag_norm:
+            statement = statement.where(TaskModel.tags.contains(f'"{tag_norm}"'))
 
-        if q:
-            q_norm = q.strip().lower()
-            if q_norm:
-                tasks = [
-                    t
-                    for t in tasks
-                    if q_norm in t.title.lower()
-                    or (t.description is not None and q_norm in t.description.lower())
-                ]
+        q_norm = (q or "").strip().lower()
+        if q_norm:
+            like = f"%{q_norm}%"
+            statement = statement.where(
+                or_(
+                    func.lower(TaskModel.title).like(like),
+                    func.lower(TaskModel.description).like(like),
+                )
+            )
 
-        sort_key = (sort or "").strip().lower()
-        order_norm = (order or "desc").strip().lower()
-        reverse = order_norm != "asc"
-
-        if sort_key == "title":
-            tasks.sort(key=lambda t: t.title.lower(), reverse=reverse)
-        elif sort_key == "priority":
-            rank = {"low": 1, "medium": 2, "high": 3}
-            tasks.sort(key=lambda t: rank.get(t.priority, 0), reverse=reverse)
-        else:
-            tasks.sort(key=lambda t: t.created_at, reverse=True)
-
-        return tasks
+        result = self._session.exec(statement).one()
+        try:
+            return int(result)
+        except (TypeError, ValueError):
+            return 0
 
     def update(self, task: Task) -> Task:
         """Update an existing task."""

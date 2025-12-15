@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Navigation } from '@/components/dashboard/Navigation'
 import { TaskList } from '@/components/dashboard/TaskList'
@@ -47,6 +47,9 @@ function TasksContent() {
   const { toast } = useToast()
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [userName, setUserName] = useState('')
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
   const [search, setSearch] = useState('')
@@ -61,6 +64,13 @@ function TasksContent() {
   const [deletingTask, setDeletingTask] = useState<Task | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [auth, setAuth] = useState<{ userId: string; token: string } | null>(null)
+
+  const isFirstQueryLoadRef = useRef(true)
+  const isResettingQueryRef = useRef(false)
+  const abortRef = useRef<AbortController | null>(null)
+  const cacheRef = useRef<Map<string, Task[]>>(new Map())
+
+  const PAGE_SIZE = 20
 
   useEffect(() => {
     let isMounted = true
@@ -114,7 +124,6 @@ function TasksContent() {
       if (!isMounted) return
       setUserName(name || 'User')
       setAuth({ userId, token })
-      await loadTasks(userId, token, {})
     }
 
     init()
@@ -136,14 +145,31 @@ function TasksContent() {
       order,
     }
 
+    // First load: fetch immediately (targets login→tasks usable).
+    if (isFirstQueryLoadRef.current) {
+      isFirstQueryLoadRef.current = false
+      loadTasks(auth.userId, auth.token, query, { offset: 0, mode: 'replace' })
+      return
+    }
+
+    // Subsequent changes: debounce, and abort in-flight requests.
     const handle = setTimeout(() => {
-      loadTasks(auth.userId, auth.token, query)
+      setTasks([])
+      setTotal(0)
+      setHasMore(false)
+      isResettingQueryRef.current = true
+      loadTasks(auth.userId, auth.token, query, { offset: 0, mode: 'replace' })
     }, 250)
 
     return () => clearTimeout(handle)
   }, [auth, filter, priorityFilter, tagFilter, search, sort, order])
 
-  const loadTasks = async (userId: string, token: string, query: TaskListQuery) => {
+  const loadTasks = async (
+    userId: string,
+    token: string,
+    query: TaskListQuery,
+    opts: { offset: number; mode: 'replace' | 'append' }
+  ) => {
     try {
       const params = new URLSearchParams()
       if (query.status) params.set('status', query.status)
@@ -152,6 +178,25 @@ function TasksContent() {
       if (query.q) params.set('q', query.q)
       if (query.sort) params.set('sort', query.sort)
       if (query.order) params.set('order', query.order)
+
+      params.set('limit', String(PAGE_SIZE))
+      params.set('offset', String(opts.offset))
+
+      const cacheKey = params.toString()
+      const isFirstPage = opts.offset === 0
+      const cached = isFirstPage ? cacheRef.current.get(cacheKey) : undefined
+      if (cached && opts.mode === 'replace') {
+        setTasks(cached)
+      }
+
+      // Abort the previous request (rapid filter changes).
+      if (opts.mode === 'replace') {
+        abortRef.current?.abort()
+      }
+      const controller = new AbortController()
+      if (opts.mode === 'replace') {
+        abortRef.current = controller
+      }
 
       const url = new URL(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/${userId}/tasks`
@@ -166,6 +211,7 @@ function TasksContent() {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
+          signal: controller.signal,
         }
       )
 
@@ -180,16 +226,63 @@ function TasksContent() {
       }
 
       const data = await response.json()
-      setTasks(data.tasks || [])
+      const nextTasks = data.tasks || []
+
+      if (isFirstPage) {
+        cacheRef.current.set(cacheKey, nextTasks)
+      }
+
+      setTotal(typeof data.total === 'number' ? data.total : nextTasks.length)
+      setHasMore(Boolean(data.has_more))
+
+      if (opts.mode === 'append') {
+        setTasks((prev) => {
+          const seen = new Set(prev.map((t) => t.id))
+          const merged = [...prev]
+          for (const t of nextTasks) {
+            if (!seen.has(t.id)) merged.push(t)
+          }
+          return merged
+        })
+      } else {
+        setTasks(nextTasks)
+      }
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return
+      }
       toast({
         title: 'Error',
         description: 'Failed to load tasks. Please try again.',
         variant: 'destructive',
       })
     } finally {
+      if (opts.mode === 'append') {
+        setLoadingMore(false)
+      }
+      if (isResettingQueryRef.current) {
+        isResettingQueryRef.current = false
+      }
       setLoading(false)
     }
+  }
+
+  const handleLoadMore = async () => {
+    if (!auth) return
+    if (!hasMore) return
+    if (loadingMore) return
+
+    const query: TaskListQuery = {
+      status: filter === 'all' ? undefined : filter,
+      priority: priorityFilter === 'all' ? undefined : priorityFilter,
+      tag: tagFilter.trim() ? tagFilter.trim() : undefined,
+      q: search.trim() ? search.trim() : undefined,
+      sort: sort === 'created_at' ? undefined : sort,
+      order,
+    }
+
+    setLoadingMore(true)
+    await loadTasks(auth.userId, auth.token, query, { offset: tasks.length, mode: 'append' })
   }
 
   const handleToggleComplete = async (taskId: number) => {
@@ -261,9 +354,20 @@ function TasksContent() {
 
       if (!response.ok) throw new Error('Failed to create task')
 
-      const newTask = await response.json()
-      setTasks((prev) => [newTask, ...prev])
+      // Refresh first page so ordering + pagination stays consistent.
+      cacheRef.current.clear()
       setIsCreateModalOpen(false)
+      if (auth) {
+        const query: TaskListQuery = {
+          status: filter === 'all' ? undefined : filter,
+          priority: priorityFilter === 'all' ? undefined : priorityFilter,
+          tag: tagFilter.trim() ? tagFilter.trim() : undefined,
+          q: search.trim() ? search.trim() : undefined,
+          sort: sort === 'created_at' ? undefined : sort,
+          order,
+        }
+        await loadTasks(auth.userId, auth.token, query, { offset: 0, mode: 'replace' })
+      }
       
       toast({
         title: 'Success',
@@ -350,6 +454,7 @@ function TasksContent() {
       if (!response.ok) throw new Error('Failed to delete task')
 
       setTasks((prev) => prev.filter((t) => t.id !== deletingTask.id))
+      setTotal((prev) => Math.max(0, prev - 1))
       setIsDeleteModalOpen(false)
       setDeletingTask(null)
 
@@ -475,10 +580,10 @@ function TasksContent() {
                 'focus-visible:ring-offset-gray-950'
               )}
             >
-              <option value="all">All</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="all" className="bg-gray-950 text-white">All</option>
+              <option value="high" className="bg-gray-950 text-white">High</option>
+              <option value="medium" className="bg-gray-950 text-white">Medium</option>
+              <option value="low" className="bg-gray-950 text-white">Low</option>
             </select>
           </div>
 
@@ -505,9 +610,9 @@ function TasksContent() {
                 'focus-visible:ring-offset-gray-950'
               )}
             >
-              <option value="created_at">Created</option>
-              <option value="title">Title</option>
-              <option value="priority">Priority</option>
+              <option value="created_at" className="bg-gray-950 text-white">Created</option>
+              <option value="title" className="bg-gray-950 text-white">Title</option>
+              <option value="priority" className="bg-gray-950 text-white">Priority</option>
             </select>
           </div>
 
@@ -525,8 +630,8 @@ function TasksContent() {
                 'focus-visible:ring-offset-gray-950'
               )}
             >
-              <option value="desc">Desc</option>
-              <option value="asc">Asc</option>
+              <option value="desc" className="bg-gray-950 text-white">Desc</option>
+              <option value="asc" className="bg-gray-950 text-white">Asc</option>
             </select>
           </div>
         </div>
@@ -539,6 +644,19 @@ function TasksContent() {
           onEdit={handleEdit}
           onDelete={handleRequestDelete}
         />
+
+        {hasMore ? (
+          <div className="mt-8 flex justify-center">
+            <Button
+              variant="outline"
+              onClick={handleLoadMore}
+              isLoading={loadingMore}
+              aria-label="Load more tasks"
+            >
+              Load more ({Math.min(tasks.length, total)}/{total})
+            </Button>
+          </div>
+        ) : null}
       </main>
 
       {/* Create Task Modal */}

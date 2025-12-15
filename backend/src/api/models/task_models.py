@@ -64,6 +64,7 @@ class TaskListResponse(BaseModel):
 
     tasks: list[TaskResponse] = Field(..., description="List of tasks")
     total: int = Field(..., description="Total number of tasks")
+    has_more: bool = Field(False, description="Whether more tasks are available")
 
     class Config:
         json_schema_extra = {
@@ -82,5 +83,6 @@ class TaskListResponse(BaseModel):
                     }
                 ],
                 "total": 1,
+                "has_more": False,
             }
         }

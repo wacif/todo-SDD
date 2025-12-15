@@ -421,6 +421,40 @@ def test_list_tasks_sort_priority_desc(client, auth_user):
     assert priorities[:3] == ["high", "medium", "low"]
 
 
+def test_list_tasks_pagination_default_20_and_load_more(client, auth_user):
+    """Phase II scaling: list endpoint paginates with limit=20 and supports offset."""
+    # Create 25 tasks
+    for i in range(25):
+        resp = client.post(
+            f"/api/{auth_user['user_id']}/tasks",
+            json={"title": f"Task {i}"},
+            headers={"Authorization": f"Bearer {auth_user['token']}"},
+        )
+        assert resp.status_code == 201
+
+    # Default request should return first 20
+    resp_page1 = client.get(
+        f"/api/{auth_user['user_id']}/tasks",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert resp_page1.status_code == 200
+    data1 = resp_page1.json()
+    assert len(data1["tasks"]) == 20
+    assert data1["total"] == 25
+    assert data1["has_more"] is True
+
+    # Next page should return remaining 5
+    resp_page2 = client.get(
+        f"/api/{auth_user['user_id']}/tasks?limit=20&offset=20",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert resp_page2.status_code == 200
+    data2 = resp_page2.json()
+    assert len(data2["tasks"]) == 5
+    assert data2["total"] == 25
+    assert data2["has_more"] is False
+
+
 def test_toggle_task_complete_success(client, auth_user):
     """Test successfully toggling task completion status."""
     # Create a task

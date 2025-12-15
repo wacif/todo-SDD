@@ -146,9 +146,9 @@ export function TaskForm({ onSubmit, onCancel, initialTask }: TaskFormProps) {
             'disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200'
           )}
         >
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
+          <option value="high" className="bg-gray-950 text-white">High</option>
+          <option value="medium" className="bg-gray-950 text-white">Medium</option>
+          <option value="low" className="bg-gray-950 text-white">Low</option>
         </select>
       </div>
 
