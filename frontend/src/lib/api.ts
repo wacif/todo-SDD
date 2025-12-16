@@ -59,6 +59,8 @@ export interface TaskListQuery {
   q?: string;
   sort?: 'title' | 'priority';
   order?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
 }
 
 /**
@@ -67,6 +69,7 @@ export interface TaskListQuery {
 export interface TaskListResponse {
   tasks: Task[];
   total: number;
+  has_more?: boolean;
 }
 
 /**
@@ -121,6 +124,8 @@ export async function listTasks(
   if (query.q) params.set('q', query.q);
   if (query.sort) params.set('sort', query.sort);
   if (query.order) params.set('order', query.order);
+  if (typeof query.limit === 'number') params.set('limit', String(query.limit));
+  if (typeof query.offset === 'number') params.set('offset', String(query.offset));
 
   const url = params.toString()
     ? `${API_BASE_URL}/api/${userId}/tasks?${params.toString()}`

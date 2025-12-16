@@ -135,6 +135,8 @@ Represents a single todo item owned by a user. Evolved from Phase I with user ow
 | `title` | String (200) | NOT NULL | Brief task description |
 | `description` | String (1000) | NULLABLE | Optional detailed task description |
 | `completed` | Boolean | NOT NULL, DEFAULT FALSE | Task completion status |
+| `priority` | Enum (`high` \| `medium` \| `low`) | NOT NULL, DEFAULT `medium` | Priority used for sorting/filtering in the Inbox UI |
+| `tags` | String[] | NOT NULL, DEFAULT `[]` | Tags/categories (normalized to lowercase) |
 | `created_at` | DateTime | NOT NULL, DEFAULT NOW() | Task creation timestamp (UTC) |
 | `updated_at` | DateTime | NOT NULL, DEFAULT NOW(), AUTO UPDATE | Last modification timestamp (UTC) |
 
@@ -154,6 +156,15 @@ Represents a single todo item owned by a user. Evolved from Phase I with user ow
 **Completed**:
 - Boolean only (true/false)
 - Default: false (new tasks are incomplete)
+
+**Priority**:
+- Must be one of: `high`, `medium`, `low`
+- Default: `medium`
+
+**Tags**:
+- Stored as a list of strings
+- Normalized to lowercase on write (e.g. `"Home"` → `"home"`)
+- Empty/whitespace tags are ignored
 
 **User ID**:
 - Must reference existing user in `users` table
@@ -234,6 +245,8 @@ export interface Task {
   title: string;
   description: string | null;
   completed: boolean;
+  priority: 'high' | 'medium' | 'low';
+  tags: string[];
   created_at: string;  // ISO 8601 datetime
   updated_at: string;
 }
@@ -241,12 +254,49 @@ export interface Task {
 export interface TaskCreateInput {
   title: string;
   description?: string;  // Optional
+  priority?: 'high' | 'medium' | 'low';
+  tags?: string[];
 }
 
 export interface TaskUpdateInput {
   title?: string;
   description?: string;
   completed?: boolean;
+  priority?: 'high' | 'medium' | 'low';
+  tags?: string[];
+}
+```
+
+---
+
+## 2b. Task Meta (Frontend-Only Enhancements)
+
+### Purpose
+The Inbox-style Tasks UI supports a few enhancements that are **not persisted in the Phase II backend**:
+
+- **dueDate**: Date shown in the Inbox list and used by Today/Upcoming filtering
+- **subtasks**: Simple checklist items inside the slide-over detail panel
+
+These are stored locally in the browser via `localStorage`, scoped per user and keyed by task ID.
+
+### Storage Key
+
+```
+task_meta_v1:{user_id}
+```
+
+### TypeScript Types (Frontend)
+
+```typescript
+export type SubtaskMeta = {
+  id: string
+  text: string
+  completed: boolean
+}
+
+export type TaskMeta = {
+  dueDate?: string // ISO string
+  subtasks?: SubtaskMeta[]
 }
 ```
 
