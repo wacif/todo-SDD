@@ -32,7 +32,7 @@ export function EmptyState({
       <div
         className={cn(
           'rounded-2xl p-10 flex flex-col items-center',
-          variant === 'default' && 'bg-gray-900/30 border border-gray-800 backdrop-blur-sm'
+          variant === 'default' && 'bg-muted/30 border border-border backdrop-blur-sm'
         )}
       >
         {Icon && (
@@ -66,3 +66,4 @@ export function EmptyState({
     </div>
   )
 }
+

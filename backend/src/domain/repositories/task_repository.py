@@ -55,6 +55,8 @@ class TaskRepository(Protocol):
         q: str | None = None,
         sort: str | None = None,
         order: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
     ) -> list[Task]:
         """
         Retrieve all tasks for a specific user.
@@ -65,6 +67,17 @@ class TaskRepository(Protocol):
         Returns:
             List of task entities (may be empty), ordered by created_at DESC
         """
+        ...
+
+    def count_by_user(
+        self,
+        user_id: str,
+        status: str | None = None,
+        priority: str | None = None,
+        tag: str | None = None,
+        q: str | None = None,
+    ) -> int:
+        """Count tasks for a user, with optional filters applied."""
         ...
 
     def update(self, task: Task) -> Task:

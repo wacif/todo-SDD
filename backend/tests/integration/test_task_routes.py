@@ -421,6 +421,40 @@ def test_list_tasks_sort_priority_desc(client, auth_user):
     assert priorities[:3] == ["high", "medium", "low"]
 
 
+def test_list_tasks_pagination_default_20_and_load_more(client, auth_user):
+    """Phase II scaling: list endpoint paginates with limit=20 and supports offset."""
+    # Create 25 tasks
+    for i in range(25):
+        resp = client.post(
+            f"/api/{auth_user['user_id']}/tasks",
+            json={"title": f"Task {i}"},
+            headers={"Authorization": f"Bearer {auth_user['token']}"},
+        )
+        assert resp.status_code == 201
+
+    # Default request should return first 20
+    resp_page1 = client.get(
+        f"/api/{auth_user['user_id']}/tasks",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert resp_page1.status_code == 200
+    data1 = resp_page1.json()
+    assert len(data1["tasks"]) == 20
+    assert data1["total"] == 25
+    assert data1["has_more"] is True
+
+    # Next page should return remaining 5
+    resp_page2 = client.get(
+        f"/api/{auth_user['user_id']}/tasks?limit=20&offset=20",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert resp_page2.status_code == 200
+    data2 = resp_page2.json()
+    assert len(data2["tasks"]) == 5
+    assert data2["total"] == 25
+    assert data2["has_more"] is False
+
+
 def test_toggle_task_complete_success(client, auth_user):
     """Test successfully toggling task completion status."""
     # Create a task
@@ -483,3 +517,154 @@ def test_toggle_task_complete_nonexistent_task(client, auth_user):
         headers={"Authorization": f"Bearer {auth_user['token']}"},
     )
     assert response.status_code == 404
+
+
+def test_get_task_success(client, auth_user):
+    """US-W6: get task by id returns full details."""
+    create_response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={
+            "title": "Read a book",
+            "description": "Start with chapter 1",
+            "priority": "low",
+            "tags": ["personal"],
+        },
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert create_response.status_code == 201
+    task_id = create_response.json()["id"]
+
+    response = client.get(
+        f"/api/{auth_user['user_id']}/tasks/{task_id}",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == task_id
+    assert data["user_id"] == auth_user["user_id"]
+    assert data["title"] == "Read a book"
+    assert data["description"] == "Start with chapter 1"
+    assert data["priority"] == "low"
+    assert data["tags"] == ["personal"]
+
+
+def test_get_task_nonexistent_returns_404(client, auth_user):
+    response = client.get(
+        f"/api/{auth_user['user_id']}/tasks/99999",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 404
+
+
+def test_get_task_mismatched_user_id_returns_403(client, auth_user):
+    create_response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "My task"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    task_id = create_response.json()["id"]
+
+    fake_user_id = "550e8400-e29b-41d4-a716-446655440000"
+    response = client.get(
+        f"/api/{fake_user_id}/tasks/{task_id}",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 403
+
+
+def test_update_task_success_updates_fields_and_timestamp(client, auth_user):
+    """US-W6: update task modifies fields and bumps updated_at."""
+    create_response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Draft", "description": "v1", "priority": "medium", "tags": ["work"]},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert create_response.status_code == 201
+    created = create_response.json()
+    task_id = created["id"]
+    old_updated_at = created["updated_at"]
+
+    update_response = client.put(
+        f"/api/{auth_user['user_id']}/tasks/{task_id}",
+        json={"title": "Final", "description": "v2", "priority": "high", "tags": ["work", "urgent"]},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert update_response.status_code == 200
+    updated = update_response.json()
+    assert updated["id"] == task_id
+    assert updated["title"] == "Final"
+    assert updated["description"] == "v2"
+    assert updated["priority"] == "high"
+    assert updated["tags"] == ["work", "urgent"]
+    assert updated["updated_at"] != old_updated_at
+
+
+def test_update_task_empty_title_returns_422(client, auth_user):
+    create_response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Valid"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    task_id = create_response.json()["id"]
+
+    update_response = client.put(
+        f"/api/{auth_user['user_id']}/tasks/{task_id}",
+        json={"title": ""},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert update_response.status_code == 422
+
+
+def test_update_task_nonexistent_returns_404(client, auth_user):
+    response = client.put(
+        f"/api/{auth_user['user_id']}/tasks/99999",
+        json={"title": "Anything"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 404
+
+
+def test_delete_task_success_removes_task(client, auth_user):
+    """US-W7: delete returns 204 and task is gone."""
+    create_response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "Disposable"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    task_id = create_response.json()["id"]
+
+    delete_response = client.delete(
+        f"/api/{auth_user['user_id']}/tasks/{task_id}",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert delete_response.status_code == 204
+
+    get_response = client.get(
+        f"/api/{auth_user['user_id']}/tasks/{task_id}",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert get_response.status_code == 404
+
+
+def test_delete_task_nonexistent_returns_404(client, auth_user):
+    response = client.delete(
+        f"/api/{auth_user['user_id']}/tasks/99999",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 404
+
+
+def test_delete_task_mismatched_user_id_returns_403(client, auth_user):
+    create_response = client.post(
+        f"/api/{auth_user['user_id']}/tasks",
+        json={"title": "My task"},
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    task_id = create_response.json()["id"]
+
+    fake_user_id = "550e8400-e29b-41d4-a716-446655440000"
+    response = client.delete(
+        f"/api/{fake_user_id}/tasks/{task_id}",
+        headers={"Authorization": f"Bearer {auth_user['token']}"},
+    )
+    assert response.status_code == 403

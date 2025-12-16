@@ -1,7 +1,16 @@
 """Task input DTO - for task creation and updates."""
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional
+
+
+@dataclass(frozen=True)
+class SubtaskInputDTO:
+    """Subtask input data transfer object."""
+    id: str
+    text: str
+    completed: bool = False
 
 
 @dataclass(frozen=True)
@@ -19,6 +28,8 @@ class TaskInputDTO:
     completed: bool = False
     priority: str = "medium"
     tags: tuple[str, ...] = ()
+    due_date: Optional[datetime] = None
+    subtasks: tuple[SubtaskInputDTO, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -36,6 +47,8 @@ class TaskUpdateDTO:
     completed: Optional[bool] = None
     priority: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
+    due_date: Optional[datetime] = None
+    subtasks: Optional[tuple[SubtaskInputDTO, ...]] = None
 
 
 @dataclass(frozen=True)
@@ -48,3 +61,5 @@ class TaskListQueryDTO:
     q: Optional[str] = None
     sort: Optional[str] = None  # title | priority
     order: str = "desc"  # asc | desc
+    limit: int = 20
+    offset: int = 0

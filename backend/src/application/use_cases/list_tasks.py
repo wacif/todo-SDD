@@ -1,6 +1,6 @@
 """List tasks use case - retrieve all tasks for a user."""
 
-from src.application.dto.task_dto import TaskDTO
+from src.application.dto.task_dto import TaskDTO, SubtaskDTO
 from src.application.dto.task_input_dto import TaskListQueryDTO
 from src.domain.repositories.task_repository import TaskRepository
 
@@ -50,6 +50,8 @@ class ListTasksUseCase:
             q=query.q,
             sort=query.sort,
             order=query.order,
+            limit=query.limit,
+            offset=query.offset,
         )
 
         # Convert to DTOs
@@ -62,6 +64,11 @@ class ListTasksUseCase:
                 completed=task.completed,
                 priority=task.priority,
                 tags=task.tags,
+                due_date=task.due_date,
+                subtasks=tuple(
+                    SubtaskDTO(id=s.id, text=s.text, completed=s.completed)
+                    for s in task.subtasks
+                ),
                 created_at=task.created_at,
                 updated_at=task.updated_at,
             )

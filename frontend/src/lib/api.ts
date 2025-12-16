@@ -28,6 +28,15 @@ export class ApiError extends Error {
 }
 
 /**
+ * Subtask interface for checklist items within a task
+ */
+export interface Subtask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+/**
  * Task interface matching backend TaskResponse
  */
 export interface Task {
@@ -38,6 +47,8 @@ export interface Task {
   completed: boolean;
   priority: 'high' | 'medium' | 'low';
   tags: string[];
+  due_date: string | null;
+  subtasks: Subtask[];
   created_at: string;
   updated_at: string;
 }
@@ -50,6 +61,8 @@ export interface TaskInput {
   description?: string | null;
   priority?: 'high' | 'medium' | 'low';
   tags?: string[];
+  due_date?: string | null;
+  subtasks?: Subtask[];
 }
 
 export interface TaskListQuery {
@@ -59,6 +72,8 @@ export interface TaskListQuery {
   q?: string;
   sort?: 'title' | 'priority';
   order?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
 }
 
 /**
@@ -67,6 +82,7 @@ export interface TaskListQuery {
 export interface TaskListResponse {
   tasks: Task[];
   total: number;
+  has_more?: boolean;
 }
 
 /**
@@ -121,6 +137,8 @@ export async function listTasks(
   if (query.q) params.set('q', query.q);
   if (query.sort) params.set('sort', query.sort);
   if (query.order) params.set('order', query.order);
+  if (typeof query.limit === 'number') params.set('limit', String(query.limit));
+  if (typeof query.offset === 'number') params.set('offset', String(query.offset));
 
   const url = params.toString()
     ? `${API_BASE_URL}/api/${userId}/tasks?${params.toString()}`

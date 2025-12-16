@@ -67,5 +67,7 @@ const FooterComponent: React.FC<FooterProps> = ({ footerContent }) => {
 
 // Exporting the component with default content for ease of use
 export const Footer = () => <FooterComponent footerContent={landingContent.footer} />;
+export default Footer;
 export { FooterComponent };
+
 

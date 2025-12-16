@@ -6,6 +6,14 @@ from datetime import datetime
 from src.domain.exceptions.domain_exceptions import ValidationError
 
 
+@dataclass
+class Subtask:
+    """Subtask entity representing a checklist item within a task."""
+    id: str
+    text: str
+    completed: bool = False
+
+
 @dataclass(frozen=True)
 class Task:
     """
@@ -17,6 +25,8 @@ class Task:
         title: Task title/summary (1-200 characters, required)
         description: Detailed task description (0-1000 characters, optional)
         completed: Completion status flag (default: False)
+        due_date: Optional due date for the task
+        subtasks: List of subtask items
         created_at: Creation timestamp (immutable, auto-generated)
         updated_at: Last modification timestamp (auto-updated)
 
@@ -38,6 +48,8 @@ class Task:
     completed: bool
     priority: str
     tags: tuple[str, ...]
+    due_date: datetime | None
+    subtasks: tuple[Subtask, ...]
     created_at: datetime
     updated_at: datetime
 

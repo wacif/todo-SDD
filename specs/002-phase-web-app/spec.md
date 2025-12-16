@@ -440,6 +440,18 @@ Authorization: Bearer <jwt_token>
 - Clear error messages
 - Loading states for all async operations
 
+### Clarifications (2025-12-14)
+- Landing page buttons: Fix any buttons that render “totally white” by applying a professional button style consistent with the existing app color scheme (use existing theme/Tailwind tokens; ensure readable contrast).
+- Tasks page tags: Fix any tag/badge UI that renders white (or low-contrast) by applying a professional, consistent style aligned with the existing color scheme.
+- Tasks page “New Task” modal: Ensure typed text is visible in all form fields (title, tags, etc.) with proper contrast on the dark UI.
+- Tasks page dropdowns (priority, sort, order): Ensure dropdown controls and option menus are readable and professionally styled on the dark UI.
+- Scaling targets:
+   - 5,000 concurrent users
+   - Up to 10,000 tasks per user
+   - Login → tasks usable: ≤ 1.5s p95
+   - Filter/sort changes: UI updates ≤ 250ms; data refresh ≤ 500ms p95 when a network fetch occurs
+- Redis: available for caching/rate-limiting if needed (credentials must be provided via environment variables; do not commit secrets).
+
 ### NFR-W6: Maintainability
 - Clean Architecture (frontend + backend)
 - Test coverage ≥ 80%

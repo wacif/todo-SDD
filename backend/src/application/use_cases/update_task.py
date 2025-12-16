@@ -2,9 +2,9 @@
 
 from datetime import datetime
 
-from src.application.dto.task_dto import TaskDTO
+from src.application.dto.task_dto import TaskDTO, SubtaskDTO
 from src.application.dto.task_input_dto import TaskUpdateDTO
-from src.domain.entities.task import Task
+from src.domain.entities.task import Task, Subtask
 from src.domain.repositories.task_repository import TaskRepository
 
 
@@ -55,6 +55,14 @@ class UpdateTaskUseCase:
             update_dto.task_id, update_dto.user_id
         )
 
+        # Convert subtask DTOs to domain entities if provided
+        subtasks = existing_task.subtasks
+        if update_dto.subtasks is not None:
+            subtasks = tuple(
+                Subtask(id=s.id, text=s.text, completed=s.completed)
+                for s in update_dto.subtasks
+            )
+
         # Apply updates (only non-None fields)
         updated_task = Task(
             id=existing_task.id,
@@ -80,6 +88,12 @@ class UpdateTaskUseCase:
                 if update_dto.tags is not None
                 else existing_task.tags
             ),
+            due_date=(
+                update_dto.due_date
+                if update_dto.due_date is not None
+                else existing_task.due_date
+            ),
+            subtasks=subtasks,
             created_at=existing_task.created_at,  # Immutable
             updated_at=datetime.utcnow(),  # Refresh timestamp
         )
@@ -96,6 +110,11 @@ class UpdateTaskUseCase:
             completed=saved_task.completed,
             priority=saved_task.priority,
             tags=saved_task.tags,
+            due_date=saved_task.due_date,
+            subtasks=tuple(
+                SubtaskDTO(id=s.id, text=s.text, completed=s.completed)
+                for s in saved_task.subtasks
+            ),
             created_at=saved_task.created_at,
             updated_at=saved_task.updated_at,
         )

@@ -80,3 +80,6 @@ export function HowItWorks({ content }: HowItWorksProps) {
     </section>
   );
 }
+
+export default HowItWorks
+

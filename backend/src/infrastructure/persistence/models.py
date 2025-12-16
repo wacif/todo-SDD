@@ -36,6 +36,8 @@ class TaskModel(SQLModel, table=True):
     completed: bool = Field(default=False, nullable=False)
     priority: str = Field(max_length=10, default="medium", nullable=False)
     tags: str = Field(default="[]", nullable=False)
+    due_date: Optional[datetime] = Field(default=None, nullable=True)
+    subtasks: str = Field(default="[]", nullable=False)  # JSON array of subtask objects
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(
         default_factory=datetime.utcnow,

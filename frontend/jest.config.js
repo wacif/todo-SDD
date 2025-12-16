@@ -27,6 +27,8 @@ const config = {
   // Mapping for module aliases defined in tsconfig.json and static files
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1', // Map @/ alias to src/
+    '^better-auth/react$': '<rootDir>/__mocks__/better-auth/react.ts',
+    '^better-auth/client/plugins$': '<rootDir>/__mocks__/better-auth/client-plugins.ts',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy', // Mock styles
     '\\.(gif|ttf|eot|svg|png|jpg)$': '<rootDir>/__mocks__/fileMock.js', // Mock assets
   },

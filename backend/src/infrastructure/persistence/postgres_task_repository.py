@@ -1,10 +1,12 @@
 """PostgreSQL task repository implementation."""
 
 import json
+from datetime import datetime
 
+from sqlalchemy import case, func, or_
 from sqlmodel import Session, select
 
-from src.domain.entities.task import Task
+from src.domain.entities.task import Task, Subtask
 from src.domain.exceptions.domain_exceptions import (
     EntityNotFoundError,
     UnauthorizedError,
@@ -35,6 +37,34 @@ def _tags_from_json(tags_json: str | None) -> tuple[str, ...]:
     return tuple(cleaned)
 
 
+def _subtasks_to_json(subtasks: tuple[Subtask, ...]) -> str:
+    return json.dumps([
+        {"id": s.id, "text": s.text, "completed": s.completed}
+        for s in subtasks
+    ])
+
+
+def _subtasks_from_json(subtasks_json: str | None) -> tuple[Subtask, ...]:
+    if not subtasks_json:
+        return ()
+    try:
+        parsed = json.loads(subtasks_json)
+    except json.JSONDecodeError:
+        return ()
+    if not isinstance(parsed, list):
+        return ()
+    result: list[Subtask] = []
+    for item in parsed:
+        if not isinstance(item, dict):
+            continue
+        subtask_id = item.get("id", "")
+        text = item.get("text", "")
+        completed = item.get("completed", False)
+        if subtask_id and text:
+            result.append(Subtask(id=str(subtask_id), text=str(text), completed=bool(completed)))
+    return tuple(result)
+
+
 class PostgresTaskRepository:
     """
     PostgreSQL implementation of TaskRepository.
@@ -61,6 +91,8 @@ class PostgresTaskRepository:
             completed=task.completed,
             priority=task.priority,
             tags=_tags_to_json(task.tags),
+            due_date=task.due_date,
+            subtasks=_subtasks_to_json(task.subtasks),
             created_at=task.created_at,
             updated_at=task.updated_at,
         )
@@ -79,6 +111,8 @@ class PostgresTaskRepository:
             completed=task_model.completed,
             priority=task_model.priority,
             tags=_tags_from_json(task_model.tags),
+            due_date=task_model.due_date,
+            subtasks=_subtasks_from_json(task_model.subtasks),
             created_at=task_model.created_at,
             updated_at=task_model.updated_at,
         )
@@ -103,6 +137,8 @@ class PostgresTaskRepository:
             completed=task_model.completed,
             priority=task_model.priority,
             tags=_tags_from_json(task_model.tags),
+            due_date=task_model.due_date,
+            subtasks=_subtasks_from_json(task_model.subtasks),
             created_at=task_model.created_at,
             updated_at=task_model.updated_at,
         )
@@ -116,12 +152,62 @@ class PostgresTaskRepository:
         q: str | None = None,
         sort: str | None = None,
         order: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
     ) -> list[Task]:
-        """Retrieve tasks for a specific user with optional filter/search/sort."""
+        """Retrieve tasks for a specific user with optional filter/search/sort and pagination."""
+
         statement = select(TaskModel).where(TaskModel.user_id == user_id)
+
+        if status in {"completed", "pending"}:
+            statement = statement.where(TaskModel.completed == (status == "completed"))
+
+        if priority in {"high", "medium", "low"}:
+            statement = statement.where(TaskModel.priority == priority)
+
+        tag_norm = (tag or "").strip().lower()
+        if tag_norm:
+            # Stored as JSON array string, e.g. ["work","home"]. Match exact token.
+            statement = statement.where(TaskModel.tags.contains(f'"{tag_norm}"'))
+
+        q_norm = (q or "").strip().lower()
+        if q_norm:
+            like = f"%{q_norm}%"
+            statement = statement.where(
+                or_(
+                    func.lower(TaskModel.title).like(like),
+                    func.lower(TaskModel.description).like(like),
+                )
+            )
+
+        sort_key = (sort or "").strip().lower()
+        order_norm = (order or "desc").strip().lower()
+        is_desc = order_norm != "asc"
+
+        if sort_key == "title":
+            sort_expr = func.lower(TaskModel.title)
+        elif sort_key == "priority":
+            sort_expr = case(
+                (TaskModel.priority == "low", 1),
+                (TaskModel.priority == "medium", 2),
+                (TaskModel.priority == "high", 3),
+                else_=0,
+            )
+        else:
+            sort_expr = TaskModel.created_at
+
+        if is_desc:
+            statement = statement.order_by(sort_expr.desc(), TaskModel.id.desc())
+        else:
+            statement = statement.order_by(sort_expr.asc(), TaskModel.id.asc())
+
+        safe_limit = max(1, min(int(limit), 100))
+        safe_offset = max(0, int(offset))
+        statement = statement.offset(safe_offset).limit(safe_limit)
+
         task_models = self._session.exec(statement).all()
 
-        tasks: list[Task] = [
+        return [
             Task(
                 id=model.id,
                 user_id=model.user_id,
@@ -130,47 +216,51 @@ class PostgresTaskRepository:
                 completed=model.completed,
                 priority=model.priority or "medium",
                 tags=_tags_from_json(model.tags),
+                due_date=model.due_date,
+                subtasks=_subtasks_from_json(model.subtasks),
                 created_at=model.created_at,
                 updated_at=model.updated_at,
             )
             for model in task_models
         ]
 
+    def count_by_user(
+        self,
+        user_id: str,
+        status: str | None = None,
+        priority: str | None = None,
+        tag: str | None = None,
+        q: str | None = None,
+    ) -> int:
+        """Count tasks for a user with optional filter/search applied."""
+
+        statement = select(func.count()).select_from(TaskModel).where(TaskModel.user_id == user_id)
+
         if status in {"completed", "pending"}:
-            want_completed = status == "completed"
-            tasks = [t for t in tasks if t.completed is want_completed]
+            statement = statement.where(TaskModel.completed == (status == "completed"))
 
         if priority in {"high", "medium", "low"}:
-            tasks = [t for t in tasks if t.priority == priority]
+            statement = statement.where(TaskModel.priority == priority)
 
-        if tag:
-            tag_norm = tag.strip().lower()
-            if tag_norm:
-                tasks = [t for t in tasks if tag_norm in t.tags]
+        tag_norm = (tag or "").strip().lower()
+        if tag_norm:
+            statement = statement.where(TaskModel.tags.contains(f'"{tag_norm}"'))
 
-        if q:
-            q_norm = q.strip().lower()
-            if q_norm:
-                tasks = [
-                    t
-                    for t in tasks
-                    if q_norm in t.title.lower()
-                    or (t.description is not None and q_norm in t.description.lower())
-                ]
+        q_norm = (q or "").strip().lower()
+        if q_norm:
+            like = f"%{q_norm}%"
+            statement = statement.where(
+                or_(
+                    func.lower(TaskModel.title).like(like),
+                    func.lower(TaskModel.description).like(like),
+                )
+            )
 
-        sort_key = (sort or "").strip().lower()
-        order_norm = (order or "desc").strip().lower()
-        reverse = order_norm != "asc"
-
-        if sort_key == "title":
-            tasks.sort(key=lambda t: t.title.lower(), reverse=reverse)
-        elif sort_key == "priority":
-            rank = {"low": 1, "medium": 2, "high": 3}
-            tasks.sort(key=lambda t: rank.get(t.priority, 0), reverse=reverse)
-        else:
-            tasks.sort(key=lambda t: t.created_at, reverse=True)
-
-        return tasks
+        result = self._session.exec(statement).one()
+        try:
+            return int(result)
+        except (TypeError, ValueError):
+            return 0
 
     def update(self, task: Task) -> Task:
         """Update an existing task."""
@@ -190,6 +280,8 @@ class PostgresTaskRepository:
         task_model.completed = task.completed
         task_model.priority = task.priority
         task_model.tags = _tags_to_json(task.tags)
+        task_model.due_date = task.due_date
+        task_model.subtasks = _subtasks_to_json(task.subtasks)
         task_model.updated_at = task.updated_at
 
         self._session.add(task_model)
@@ -204,6 +296,8 @@ class PostgresTaskRepository:
             completed=task_model.completed,
             priority=task_model.priority,
             tags=_tags_from_json(task_model.tags),
+            due_date=task_model.due_date,
+            subtasks=_subtasks_from_json(task_model.subtasks),
             created_at=task_model.created_at,
             updated_at=task_model.updated_at,
         )

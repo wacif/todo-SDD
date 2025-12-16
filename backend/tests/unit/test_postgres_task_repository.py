@@ -141,6 +141,33 @@ def test_list_by_user(task_repository, test_user):
     assert all(task.user_id == str(test_user.id) for task in tasks)
 
 
+def test_list_by_user_paginates_and_counts(task_repository, test_user):
+    """Repository should paginate in SQL and provide a filtered count."""
+    for i in range(25):
+        task_repository.add(
+            Task(
+                id=0,
+                user_id=str(test_user.id),
+                title=f"Task {i}",
+                description="",
+                completed=False,
+                priority="medium",
+                tags=(),
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            )
+        )
+
+    total = task_repository.count_by_user(str(test_user.id))
+    assert total == 25
+
+    page1 = task_repository.list_by_user(str(test_user.id))
+    assert len(page1) == 20
+
+    page2 = task_repository.list_by_user(str(test_user.id), offset=20)
+    assert len(page2) == 5
+
+
 def test_update_task(task_repository, test_user):
     """Test updating a task."""
     task = Task(
