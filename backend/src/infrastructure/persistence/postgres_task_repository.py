@@ -1,11 +1,12 @@
 """PostgreSQL task repository implementation."""
 
 import json
+from datetime import datetime
 
 from sqlalchemy import case, func, or_
 from sqlmodel import Session, select
 
-from src.domain.entities.task import Task
+from src.domain.entities.task import Task, Subtask
 from src.domain.exceptions.domain_exceptions import (
     EntityNotFoundError,
     UnauthorizedError,
@@ -36,6 +37,34 @@ def _tags_from_json(tags_json: str | None) -> tuple[str, ...]:
     return tuple(cleaned)
 
 
+def _subtasks_to_json(subtasks: tuple[Subtask, ...]) -> str:
+    return json.dumps([
+        {"id": s.id, "text": s.text, "completed": s.completed}
+        for s in subtasks
+    ])
+
+
+def _subtasks_from_json(subtasks_json: str | None) -> tuple[Subtask, ...]:
+    if not subtasks_json:
+        return ()
+    try:
+        parsed = json.loads(subtasks_json)
+    except json.JSONDecodeError:
+        return ()
+    if not isinstance(parsed, list):
+        return ()
+    result: list[Subtask] = []
+    for item in parsed:
+        if not isinstance(item, dict):
+            continue
+        subtask_id = item.get("id", "")
+        text = item.get("text", "")
+        completed = item.get("completed", False)
+        if subtask_id and text:
+            result.append(Subtask(id=str(subtask_id), text=str(text), completed=bool(completed)))
+    return tuple(result)
+
+
 class PostgresTaskRepository:
     """
     PostgreSQL implementation of TaskRepository.
@@ -62,6 +91,8 @@ class PostgresTaskRepository:
             completed=task.completed,
             priority=task.priority,
             tags=_tags_to_json(task.tags),
+            due_date=task.due_date,
+            subtasks=_subtasks_to_json(task.subtasks),
             created_at=task.created_at,
             updated_at=task.updated_at,
         )
@@ -80,6 +111,8 @@ class PostgresTaskRepository:
             completed=task_model.completed,
             priority=task_model.priority,
             tags=_tags_from_json(task_model.tags),
+            due_date=task_model.due_date,
+            subtasks=_subtasks_from_json(task_model.subtasks),
             created_at=task_model.created_at,
             updated_at=task_model.updated_at,
         )
@@ -104,6 +137,8 @@ class PostgresTaskRepository:
             completed=task_model.completed,
             priority=task_model.priority,
             tags=_tags_from_json(task_model.tags),
+            due_date=task_model.due_date,
+            subtasks=_subtasks_from_json(task_model.subtasks),
             created_at=task_model.created_at,
             updated_at=task_model.updated_at,
         )
@@ -181,6 +216,8 @@ class PostgresTaskRepository:
                 completed=model.completed,
                 priority=model.priority or "medium",
                 tags=_tags_from_json(model.tags),
+                due_date=model.due_date,
+                subtasks=_subtasks_from_json(model.subtasks),
                 created_at=model.created_at,
                 updated_at=model.updated_at,
             )
@@ -243,6 +280,8 @@ class PostgresTaskRepository:
         task_model.completed = task.completed
         task_model.priority = task.priority
         task_model.tags = _tags_to_json(task.tags)
+        task_model.due_date = task.due_date
+        task_model.subtasks = _subtasks_to_json(task.subtasks)
         task_model.updated_at = task.updated_at
 
         self._session.add(task_model)
@@ -257,6 +296,8 @@ class PostgresTaskRepository:
             completed=task_model.completed,
             priority=task_model.priority,
             tags=_tags_from_json(task_model.tags),
+            due_date=task_model.due_date,
+            subtasks=_subtasks_from_json(task_model.subtasks),
             created_at=task_model.created_at,
             updated_at=task_model.updated_at,
         )

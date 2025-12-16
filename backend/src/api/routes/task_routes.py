@@ -7,12 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlmodel import Session
 
 from src.api.dependencies import get_current_user_id
-from src.api.models.task_models import TaskInputDTO, TaskListResponse, TaskResponse
+from src.api.models.task_models import TaskInputDTO, TaskListResponse, TaskResponse, SubtaskDTO as ApiSubtaskDTO
 from src.application.dto.task_dto import TaskDTO
 from src.application.dto.task_input_dto import (
     TaskInputDTO as UseCaseTaskInputDTO,
     TaskListQueryDTO,
     TaskUpdateDTO,
+    SubtaskInputDTO,
 )
 from src.application.use_cases.add_task import AddTaskUseCase
 from src.application.use_cases.delete_task import DeleteTaskUseCase
@@ -72,6 +73,11 @@ def task_dto_to_response(task: TaskDTO) -> TaskResponse:
         completed=task.completed,
         priority=task.priority,
         tags=list(task.tags),
+        due_date=task.due_date.isoformat() if task.due_date else None,
+        subtasks=[
+            ApiSubtaskDTO(id=s.id, text=s.text, completed=s.completed)
+            for s in task.subtasks
+        ],
         created_at=task.created_at.isoformat(),
         updated_at=task.updated_at.isoformat(),
     )
@@ -99,6 +105,20 @@ async def create_task(
     # Validate user ownership
     validate_user_ownership(user_id, current_user_id)
 
+    # Parse due_date if provided
+    due_date = None
+    if request.due_date:
+        try:
+            due_date = datetime.fromisoformat(request.due_date.replace('Z', '+00:00'))
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid due_date format")
+
+    # Convert subtasks
+    subtasks = tuple(
+        SubtaskInputDTO(id=s.id, text=s.text, completed=s.completed)
+        for s in (request.subtasks or [])
+    )
+
     # Create use case input DTO
     use_case_input = UseCaseTaskInputDTO(
         user_id=current_user_id,
@@ -107,6 +127,8 @@ async def create_task(
         completed=False,  # New tasks default to incomplete
         priority=request.priority,
         tags=tuple(request.tags or []),
+        due_date=due_date,
+        subtasks=subtasks,
     )
 
     try:
@@ -196,6 +218,7 @@ async def get_task(
     validate_user_ownership(user_id, current_user_id)
 
     try:
+        from src.application.dto.task_dto import SubtaskDTO as DtoSubtask
         task = task_repository.get_by_id(task_id, current_user_id)
         task_dto = TaskDTO(
             id=task.id,
@@ -205,6 +228,11 @@ async def get_task(
             completed=task.completed,
             priority=task.priority,
             tags=task.tags,
+            due_date=task.due_date,
+            subtasks=tuple(
+                DtoSubtask(id=s.id, text=s.text, completed=s.completed)
+                for s in task.subtasks
+            ),
             created_at=task.created_at,
             updated_at=task.updated_at,
         )
@@ -233,6 +261,22 @@ async def update_task(
     # Validate user ownership
     validate_user_ownership(user_id, current_user_id)
 
+    # Parse due_date if provided
+    due_date = None
+    if request.due_date:
+        try:
+            due_date = datetime.fromisoformat(request.due_date.replace('Z', '+00:00'))
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid due_date format")
+
+    # Convert subtasks
+    subtasks = None
+    if request.subtasks is not None:
+        subtasks = tuple(
+            SubtaskInputDTO(id=s.id, text=s.text, completed=s.completed)
+            for s in request.subtasks
+        )
+
     # Create update DTO
     update_dto = TaskUpdateDTO(
         task_id=task_id,
@@ -241,6 +285,8 @@ async def update_task(
         description=request.description,
         priority=request.priority,
         tags=tuple(request.tags or []),
+        due_date=due_date,
+        subtasks=subtasks,
     )
 
     try:

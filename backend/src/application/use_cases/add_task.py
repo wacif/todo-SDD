@@ -2,9 +2,9 @@
 
 from datetime import datetime
 
-from src.application.dto.task_dto import TaskDTO
+from src.application.dto.task_dto import TaskDTO, SubtaskDTO
 from src.application.dto.task_input_dto import TaskInputDTO
-from src.domain.entities.task import Task
+from src.domain.entities.task import Task, Subtask
 from src.domain.repositories.task_repository import TaskRepository
 
 
@@ -55,6 +55,12 @@ class AddTaskUseCase:
         # Create timestamp
         now = datetime.utcnow()
 
+        # Convert subtask DTOs to domain entities
+        subtasks = tuple(
+            Subtask(id=s.id, text=s.text, completed=s.completed)
+            for s in task_input.subtasks
+        )
+
         # Create domain entity (ID will be 0, replaced by repository)
         task = Task(
             id=0,  # Placeholder - repository will generate serial ID
@@ -64,6 +70,8 @@ class AddTaskUseCase:
             completed=task_input.completed,
             priority=task_input.priority,
             tags=task_input.tags,
+            due_date=task_input.due_date,
+            subtasks=subtasks,
             created_at=now,
             updated_at=now,
         )
@@ -80,6 +88,11 @@ class AddTaskUseCase:
             completed=saved_task.completed,
             priority=saved_task.priority,
             tags=saved_task.tags,
+            due_date=saved_task.due_date,
+            subtasks=tuple(
+                SubtaskDTO(id=s.id, text=s.text, completed=s.completed)
+                for s in saved_task.subtasks
+            ),
             created_at=saved_task.created_at,
             updated_at=saved_task.updated_at,
         )

@@ -1,7 +1,15 @@
 """Task DTO - data transfer object for task representation."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
+
+
+@dataclass(frozen=True)
+class SubtaskDTO:
+    """Subtask data transfer object."""
+    id: str
+    text: str
+    completed: bool = False
 
 
 @dataclass(frozen=True)
@@ -20,5 +28,7 @@ class TaskDTO:
     completed: bool
     priority: str
     tags: tuple[str, ...]
+    due_date: datetime | None
+    subtasks: tuple[SubtaskDTO, ...]
     created_at: datetime
     updated_at: datetime

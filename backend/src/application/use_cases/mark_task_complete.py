@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from src.application.dto.task_dto import TaskDTO
+from src.application.dto.task_dto import TaskDTO, SubtaskDTO
 from src.domain.entities.task import Task
 from src.domain.repositories.task_repository import TaskRepository
 
@@ -61,6 +61,8 @@ class MarkTaskCompleteUseCase:
             completed=completed,
             priority=existing_task.priority,
             tags=existing_task.tags,
+            due_date=existing_task.due_date,
+            subtasks=existing_task.subtasks,
             created_at=existing_task.created_at,  # Immutable
             updated_at=datetime.utcnow(),  # Refresh timestamp
         )
@@ -77,6 +79,11 @@ class MarkTaskCompleteUseCase:
             completed=saved_task.completed,
             priority=saved_task.priority,
             tags=saved_task.tags,
+            due_date=saved_task.due_date,
+            subtasks=tuple(
+                SubtaskDTO(id=s.id, text=s.text, completed=s.completed)
+                for s in saved_task.subtasks
+            ),
             created_at=saved_task.created_at,
             updated_at=saved_task.updated_at,
         )

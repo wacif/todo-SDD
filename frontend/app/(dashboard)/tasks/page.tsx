@@ -28,17 +28,16 @@ import {
 } from 'lucide-react'
 
 import { authClient, signOut } from '@/lib/auth-client'
-import { ApiError, createTask, deleteTask, listTasks, toggleTaskComplete, updateTask, type Task as ApiTask } from '@/lib/api'
-import { deleteTaskMeta, getTaskMeta, patchTaskMeta, type SubtaskMeta } from '@/lib/taskMetadata'
+import { ApiError, createTask, deleteTask, listTasks, toggleTaskComplete, updateTask, type Task as ApiTask, type Subtask } from '@/lib/api'
 import { breakdownTask, generateSchedule, prioritizeTasks, type ScheduleItem } from '@/services/inboxAi'
 import { InboxToaster, type InboxToast } from '@/components/dashboard/InboxToaster'
 
 type FilterMode = 'all' | 'active' | 'completed' | 'high' | 'tag'
 type SidebarMode = 'inbox' | 'today' | 'upcoming' | 'filters'
 
-type UiTask = ApiTask & {
+// UiTask extends ApiTask with parsed dueDate as Date object
+type UiTask = Omit<ApiTask, 'due_date'> & {
   dueDate?: Date
-  subtasks?: SubtaskMeta[]
 }
 
 const months = [
@@ -87,11 +86,11 @@ const sameDay = (a: Date, b: Date) =>
 
 const tagLabel = (tag: string) => (tag?.length ? tag[0].toUpperCase() + tag.slice(1) : tag)
 
-function buildUiTasks(userId: string, tasks: ApiTask[]): UiTask[] {
+function buildUiTasks(tasks: ApiTask[]): UiTask[] {
   return tasks.map((t) => {
-    const meta = getTaskMeta(userId, t.id)
-    const dueDate = meta.dueDate ? new Date(meta.dueDate) : undefined
-    return { ...t, dueDate, subtasks: meta.subtasks || [] }
+    const { due_date, ...rest } = t
+    const dueDate = due_date ? new Date(due_date) : undefined
+    return { ...rest, dueDate }
   })
 }
 
@@ -126,6 +125,7 @@ function TasksContent() {
 
   const [editingTask, setEditingTask] = useState<UiTask | null>(null)
   const [savingTask, setSavingTask] = useState(false)
+  const [pendingOperations, setPendingOperations] = useState(0)
 
   const [focusedIndex, setFocusedIndex] = useState(-1)
 
@@ -229,7 +229,7 @@ function TasksContent() {
 
   const uiTasks = useMemo(() => {
     if (!auth) return [] as UiTask[]
-    return buildUiTasks(auth.userId, tasks)
+    return buildUiTasks(tasks)
   }, [auth, tasks])
 
   const availableTags = useMemo(() => {
@@ -339,31 +339,65 @@ function TasksContent() {
     setIsTagOpen(false)
   }
 
-  const handleAddTask = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleAddTask = async (e?: React.FormEvent) => {
+    e?.preventDefault()
     if (!auth) return
     if (!inputValue.trim()) return
 
+    // Generate a temporary ID for optimistic update
+    const tempId = -Date.now()
+    const optimisticTask: ApiTask = {
+      id: tempId,
+      user_id: auth.userId,
+      title: inputValue.trim(),
+      description: '',
+      priority: newTaskPriority,
+      tags: [newTaskTag.toLowerCase()],
+      due_date: newTaskDate ? newTaskDate.toISOString() : null,
+      subtasks: [],
+      completed: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
+    // Optimistically add the task immediately
+    setTasks((prev) => [optimisticTask, ...prev])
+    
+    // Clear input immediately for snappy UX
+    const savedInput = inputValue
+    const savedPriority = newTaskPriority
+    const savedTag = newTaskTag
+    const savedDate = newTaskDate
+    setInputValue('')
+    setNewTaskPriority('medium')
+    setNewTaskTag('Inbox')
+    setNewTaskDate(new Date())
+
+    setPendingOperations((n) => n + 1)
     try {
       const created = await createTask(auth.userId, {
-        title: inputValue.trim(),
+        title: savedInput.trim(),
         description: '',
-        priority: newTaskPriority,
-        tags: [newTaskTag.toLowerCase()],
+        priority: savedPriority,
+        tags: [savedTag.toLowerCase()],
+        due_date: savedDate ? savedDate.toISOString() : null,
+        subtasks: [],
       })
 
-      if (newTaskDate) {
-        patchTaskMeta(auth.userId, created.id, { dueDate: newTaskDate.toISOString() })
-      }
-
-      setTasks((prev) => [created, ...prev])
-      setInputValue('')
-      setNewTaskPriority('medium')
-      setNewTaskTag('Inbox')
-      setNewTaskDate(new Date())
+      // Replace optimistic task with real one
+      setTasks((prev) => prev.map((t) => (t.id === tempId ? created : t)))
       addToast('Task created successfully', 'success')
     } catch {
+      // Rollback on failure
+      setTasks((prev) => prev.filter((t) => t.id !== tempId))
+      // Restore input so user doesn't lose their work
+      setInputValue(savedInput)
+      setNewTaskPriority(savedPriority)
+      setNewTaskTag(savedTag)
+      setNewTaskDate(savedDate)
       addToast('Failed to create task', 'error')
+    } finally {
+      setPendingOperations((n) => Math.max(0, n - 1))
     }
   }
 
@@ -372,16 +406,21 @@ function TasksContent() {
     const current = tasks.find((t) => t.id === id)
     if (!current) return
 
-    // optimistic
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)))
+    // Optimistic update immediately
+    const newCompleted = !current.completed
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: newCompleted } : t)))
+    
+    setPendingOperations((n) => n + 1)
     try {
       const updated = await toggleTaskComplete(auth.userId, id)
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)))
       addToast(`Task marked as ${updated.completed ? 'complete' : 'incomplete'}`, 'success')
     } catch {
-      // revert
+      // Revert on failure
       setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: current.completed } : t)))
       addToast('Failed to update task', 'error')
+    } finally {
+      setPendingOperations((n) => Math.max(0, n - 1))
     }
   }
 
@@ -440,49 +479,77 @@ function TasksContent() {
   const handleSaveTask = async () => {
     if (!auth) return
     if (!editingTask) return
+    
+    // Store original task for potential rollback
+    const originalTask = tasks.find((t) => t.id === editingTask.id)
+    
+    // Optimistically update UI immediately
+    const optimisticApiTask: ApiTask = {
+      ...editingTask,
+      due_date: editingTask.dueDate ? editingTask.dueDate.toISOString() : null,
+      updated_at: new Date().toISOString(),
+    }
+    setTasks((prev) => prev.map((t) => (t.id === editingTask.id ? optimisticApiTask : t)))
+    
+    // Close panel immediately for snappy UX
+    const taskToSave = { ...editingTask }
+    setEditingTask(null)
+    addToast('Task updated', 'success')
     setSavingTask(true)
+    setPendingOperations((n) => n + 1)
 
     try {
-      const next = await updateTask(auth.userId, editingTask.id, {
-        title: editingTask.title,
-        description: editingTask.description || '',
-        priority: editingTask.priority,
-        tags: (editingTask.tags || []).map((t) => t.toLowerCase()),
+      const next = await updateTask(auth.userId, taskToSave.id, {
+        title: taskToSave.title,
+        description: taskToSave.description || '',
+        priority: taskToSave.priority,
+        tags: (taskToSave.tags || []).map((t) => t.toLowerCase()),
+        due_date: taskToSave.dueDate ? taskToSave.dueDate.toISOString() : null,
+        subtasks: taskToSave.subtasks || [],
       })
+      
+      // Update with server response
       setTasks((prev) => prev.map((t) => (t.id === next.id ? next : t)))
 
-      // Persist metadata (subtasks + due date) locally.
-      patchTaskMeta(auth.userId, editingTask.id, {
-        dueDate: editingTask.dueDate ? editingTask.dueDate.toISOString() : undefined,
-        subtasks: editingTask.subtasks || [],
-      })
-
       // Completion toggles must hit the /complete endpoint.
-      const server = tasks.find((t) => t.id === editingTask.id)
-      if (server && server.completed !== editingTask.completed) {
-        const toggled = await toggleTaskComplete(auth.userId, editingTask.id)
+      if (originalTask && originalTask.completed !== taskToSave.completed) {
+        const toggled = await toggleTaskComplete(auth.userId, taskToSave.id)
         setTasks((prev) => prev.map((t) => (t.id === toggled.id ? toggled : t)))
       }
-
-      setEditingTask(null)
-      addToast('Task updated', 'success')
     } catch {
-      addToast('Failed to update task', 'error')
+      // Rollback on failure
+      if (originalTask) {
+        setTasks((prev) => prev.map((t) => (t.id === originalTask.id ? originalTask : t)))
+      }
+      addToast('Failed to update task - changes reverted', 'error')
     } finally {
       setSavingTask(false)
+      setPendingOperations((n) => Math.max(0, n - 1))
     }
   }
 
   const handleDeleteTask = async (id: number) => {
     if (!auth) return
+    
+    // Store task for potential rollback
+    const deletedTask = tasks.find((t) => t.id === id)
+    
+    // Optimistically remove immediately
+    setTasks((prev) => prev.filter((t) => t.id !== id))
+    setEditingTask((prev) => (prev?.id === id ? null : prev))
+    addToast('Task deleted', 'info')
+    
+    setPendingOperations((n) => n + 1)
     try {
       await deleteTask(auth.userId, id)
-      deleteTaskMeta(auth.userId, id)
-      setTasks((prev) => prev.filter((t) => t.id !== id))
-      setEditingTask((prev) => (prev?.id === id ? null : prev))
-      addToast('Task deleted', 'info')
     } catch {
-      addToast('Failed to delete task', 'error')
+      // Rollback on failure
+      if (deletedTask) {
+        setTasks((prev) => [deletedTask, ...prev])
+      }
+      addToast('Failed to delete task - restored', 'error')
+    } finally {
+      setPendingOperations((n) => Math.max(0, n - 1))
     }
   }
 
@@ -491,36 +558,78 @@ function TasksContent() {
     if (editingTask) {
       if (!editingTask.title) return
       setIsAiLoading(true)
-      const brokenDown = await breakdownTask(editingTask.title)
-      const newSubtasks: SubtaskMeta[] = brokenDown.map((text, idx) => ({
-        id: `${Date.now()}-${idx}`,
-        text,
-        completed: false,
-      }))
-      const merged = [...(editingTask.subtasks || []), ...newSubtasks]
-      updateEditingTask({ subtasks: merged })
-      patchTaskMeta(auth.userId, editingTask.id, { subtasks: merged })
-      setIsAiLoading(false)
-      addToast('Subtasks generated', 'success')
+      addToast('Generating subtasks...', 'info')
+      try {
+        const brokenDown = await breakdownTask(editingTask.title)
+        const newSubtasks: Subtask[] = brokenDown.map((text, idx) => ({
+          id: `${Date.now()}-${idx}`,
+          text,
+          completed: false,
+        }))
+        const merged = [...(editingTask.subtasks || []), ...newSubtasks]
+        updateEditingTask({ subtasks: merged })
+        // Subtasks will be saved when user clicks "Update Task"
+        addToast('Subtasks generated', 'success')
+      } catch {
+        addToast('Failed to generate subtasks', 'error')
+      } finally {
+        setIsAiLoading(false)
+      }
     } else {
       if (!inputValue.trim()) return
       setIsAiLoading(true)
-      const brokenDown = await breakdownTask(inputValue.trim())
+      addToast('Breaking down task...', 'info')
+      
+      // Save and clear input immediately
+      const savedInput = inputValue
+      const savedPriority = newTaskPriority
+      const savedDate = newTaskDate
+      setInputValue('')
+      
       try {
-        const created: ApiTask[] = []
-        for (const text of brokenDown) {
-          const t = await createTask(auth.userId, {
-            title: text,
-            description: '',
-            priority: newTaskPriority,
-            tags: ['ai generated'],
-          })
-          if (newTaskDate) patchTaskMeta(auth.userId, t.id, { dueDate: newTaskDate.toISOString() })
-          created.push(t)
+        const brokenDown = await breakdownTask(savedInput.trim())
+        
+        // Create optimistic tasks immediately
+        const tempTasks: ApiTask[] = brokenDown.map((text, idx) => ({
+          id: -(Date.now() + idx),
+          user_id: auth.userId,
+          title: text,
+          description: '',
+          priority: savedPriority,
+          tags: ['ai generated'],
+          due_date: savedDate ? savedDate.toISOString() : null,
+          subtasks: [],
+          completed: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }))
+        
+        setTasks((prev) => [...tempTasks, ...prev])
+        addToast(`${brokenDown.length} tasks generated`, 'success')
+        
+        // Create real tasks in background
+        for (let i = 0; i < brokenDown.length; i++) {
+          const text = brokenDown[i]
+          const tempId = tempTasks[i].id
+          try {
+            const t = await createTask(auth.userId, {
+              title: text,
+              description: '',
+              priority: savedPriority,
+              tags: ['ai generated'],
+              due_date: savedDate ? savedDate.toISOString() : null,
+              subtasks: [],
+            })
+            setTasks((prev) => prev.map((task) => (task.id === tempId ? t : task)))
+          } catch {
+            // Remove failed task
+            setTasks((prev) => prev.filter((task) => task.id !== tempId))
+          }
         }
-        setTasks((prev) => [...created, ...prev])
-        setInputValue('')
-        addToast(`${created.length} tasks generated`, 'success')
+      } catch {
+        // Restore input on total failure
+        setInputValue(savedInput)
+        addToast('Failed to break down task', 'error')
       } finally {
         setIsAiLoading(false)
       }
@@ -735,6 +844,12 @@ function TasksContent() {
           </div>
 
           <div className="flex items-center gap-3">
+            {pendingOperations > 0 && (
+              <div className="flex items-center gap-2 text-xs text-indigo-400">
+                <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                <span className="hidden sm:inline">Syncing...</span>
+              </div>
+            )}
             <div className="hidden md:flex items-center gap-2 bg-white/5 border border-white/5 rounded-md px-2 py-1">
               <Command size={12} className="text-gray-500" />
               <span className="text-xs text-gray-500 font-mono">K</span>
@@ -1249,7 +1364,7 @@ function TasksContent() {
                       />
                     </div>
 
-                    {/* Subtasks Section (local metadata) */}
+                    {/* Subtasks Section */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -1271,7 +1386,6 @@ function TasksContent() {
                                 const newSubs = [...(editingTask.subtasks || [])]
                                 newSubs[idx] = { ...sub, completed: !sub.completed }
                                 updateEditingTask({ subtasks: newSubs })
-                                if (auth) patchTaskMeta(auth.userId, editingTask.id, { subtasks: newSubs })
                               }}
                               className={`text-gray-500 ${sub.completed ? 'text-green-500' : 'hover:text-white'}`}
                               aria-label="Toggle subtask"
@@ -1283,7 +1397,6 @@ function TasksContent() {
                               onClick={() => {
                                 const newSubs = (editingTask.subtasks || []).filter((_, i) => i !== idx)
                                 updateEditingTask({ subtasks: newSubs })
-                                if (auth) patchTaskMeta(auth.userId, editingTask.id, { subtasks: newSubs })
                               }}
                               className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400"
                               aria-label="Remove subtask"
@@ -1305,10 +1418,9 @@ function TasksContent() {
                               if (e.key === 'Enter') {
                                 const val = (e.target as HTMLInputElement).value
                                 if (!val.trim()) return
-                                const newSub: SubtaskMeta = { id: Date.now().toString(), text: val.trim(), completed: false }
+                                const newSub: Subtask = { id: Date.now().toString(), text: val.trim(), completed: false }
                                 const merged = [...(editingTask.subtasks || []), newSub]
                                 updateEditingTask({ subtasks: merged })
-                                if (auth) patchTaskMeta(auth.userId, editingTask.id, { subtasks: merged })
                                 ;(e.target as HTMLInputElement).value = ''
                               }
                             }}

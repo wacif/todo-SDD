@@ -28,6 +28,15 @@ export class ApiError extends Error {
 }
 
 /**
+ * Subtask interface for checklist items within a task
+ */
+export interface Subtask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+/**
  * Task interface matching backend TaskResponse
  */
 export interface Task {
@@ -38,6 +47,8 @@ export interface Task {
   completed: boolean;
   priority: 'high' | 'medium' | 'low';
   tags: string[];
+  due_date: string | null;
+  subtasks: Subtask[];
   created_at: string;
   updated_at: string;
 }
@@ -50,6 +61,8 @@ export interface TaskInput {
   description?: string | null;
   priority?: 'high' | 'medium' | 'low';
   tags?: string[];
+  due_date?: string | null;
+  subtasks?: Subtask[];
 }
 
 export interface TaskListQuery {
