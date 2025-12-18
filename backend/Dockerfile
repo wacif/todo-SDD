@@ -17,6 +17,8 @@ COPY alembic.ini ./
 COPY migrations ./migrations
 COPY src ./src
 
+ENV PATH="/app/.venv/bin:$PATH"
+
 EXPOSE 8080
 
-CMD ["sh", "-c", "uv run uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uvicorn src.api.main:app --host 0.0.0.0 --port ${PORT}"]
