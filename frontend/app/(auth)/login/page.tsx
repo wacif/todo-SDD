@@ -40,37 +40,25 @@ function LoginContent() {
         return
       }
 
-            // Get JWT token
-      const { data: tokenData } = await authClient.token()
-      
-      console.log('Sign in data:', signInData);
-      console.log('Token data:', tokenData);
+      const [{ data: sessionData }, { data: tokenData }] = await Promise.all([
+        authClient.getSession(),
+        authClient.token(),
+      ])
 
-      if (tokenData?.token) {
-        localStorage.setItem('auth_token', tokenData.token)
-        
-        if (signInData?.user) {
-             localStorage.setItem('user_id', signInData.user.id)
-             localStorage.setItem('user_email', signInData.user.email)
-             localStorage.setItem('user_name', signInData.user.name)
-        } else {
-            console.error('User data missing in sign in response');
-        }
-      } else {
-          console.error('Token missing in token response');
-          // Fallback: check if we can get session
-          const { data: sessionData } = await authClient.getSession();
-          console.log('Session data:', sessionData);
-          if (sessionData?.session) {
-              // If we have a session but no token, we might be in a weird state for JWT.
-              // But let's see if we can proceed or if we need to show an error.
-          }
+      if (!tokenData?.token) {
+        setError('Login successful but failed to retrieve access token. Please try again.')
+        setLoading(false)
+        return
       }
 
-      if (!localStorage.getItem('auth_token')) {
-          setError('Login successful but failed to retrieve access token. Please try again.');
-          setLoading(false);
-          return;
+      try {
+        localStorage.setItem('auth_token', tokenData.token)
+        const user = sessionData?.user ?? signInData?.user
+        if (user?.id) localStorage.setItem('user_id', user.id)
+        if (user?.email) localStorage.setItem('user_email', user.email)
+        if (user?.name) localStorage.setItem('user_name', user.name)
+      } catch {
+        // ignore
       }
 
       toast({

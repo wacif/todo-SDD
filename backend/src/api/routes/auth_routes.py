@@ -1,8 +1,5 @@
 """Authentication routes for signup and signin."""
 
-from datetime import datetime
-from uuid import uuid4
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
@@ -15,7 +12,7 @@ from src.domain.exceptions.domain_exceptions import DuplicateEntityError, Valida
 from src.domain.repositories.user_repository import UserRepository
 from src.infrastructure.persistence.database import get_session
 from src.infrastructure.persistence.postgres_user_repository import PostgresUserRepository
-from src.infrastructure.security.security import create_access_token, hash_password
+from src.infrastructure.security.security import create_access_token
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 

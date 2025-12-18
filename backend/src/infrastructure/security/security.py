@@ -1,6 +1,7 @@
 """Security utilities for password hashing and JWT."""
 
 from datetime import datetime, timedelta
+import logging
 from typing import Optional
 from uuid import UUID
 
@@ -17,6 +18,8 @@ from src.infrastructure.config.settings import settings
 
 # Bcrypt cost factor for password hashing
 BCRYPT_ROUNDS = 12
+
+logger = logging.getLogger(__name__)
 
 
 _JWKS_CACHE: dict[str, object] = {"fetched_at": 0.0, "jwks": None}
@@ -152,5 +155,5 @@ def decode_access_token(token: str) -> Optional[str]:
             return None
         return user_id
     except Exception as e:
-        print(f"Token validation error: {str(e)}")
+        logger.debug("Token validation error", exc_info=True)
         return None
