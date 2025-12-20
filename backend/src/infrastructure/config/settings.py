@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     app_env: str = "development"
     debug: bool = True
     allowed_origins: str = "http://localhost:3000"
+    log_request_timing: bool = False
+    log_slow_request_ms: int = 500
+    log_sql_timing: bool = False
+    log_slow_query_ms: int = 200
 
     # Server
     host: str = "0.0.0.0"
